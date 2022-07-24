@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DirectX">
+      <UniqueIdentifier>{9ca3b802-1def-449a-9a70-3e5d1e78434a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{bb9063f3-0268-4332-90aa-9171383b5b37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{cd028ff0-4e89-4dde-adb5-be73c053d42b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\Model">
+      <UniqueIdentifier>{53b70205-1cac-45d9-9557-899c32f74211}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logic">
+      <UniqueIdentifier>{98251d43-6f34-42db-b008-b6144eb0c544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tool">
+      <UniqueIdentifier>{34a7fe31-b6fa-44de-b67f-f1d380897ff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{5c5bf796-9de3-49a3-9e11-bb87cb245c63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Auxiliary">
+      <UniqueIdentifier>{256c1a1a-2eab-458e-9b4d-0354c02f66b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\Auxiliary">
+      <UniqueIdentifier>{8bbe6741-cdc4-4a97-b350-70dbff42b0cb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Logic\framework.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic\pch.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Rendering\BGraphics.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Tool\TMathTool.h">
+      <Filter>Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX\d3dx12.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX\DX_App.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX\DX_Information.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Auxiliary\BGPU_Upload_Resource.h">
+      <Filter>Render\Auxiliary</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Auxiliary\DDSTextureLoader.h">
+      <Filter>Render\Auxiliary</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BasePass.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BDeferredRendering.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BGPU_Resource_Factory.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BResource_Heap.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Pass.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\Model\RObject_Model.h">
+      <Filter>Resource\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\Model\RSkeleton_Model.h">
+      <Filter>Resource\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\Model\RStatic_Model.h">
+      <Filter>Resource\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RCamera.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RLight.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RMaterial.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RRender_Scene.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RTexture.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\BProcess.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\BWindow.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Pre_Define.h" />
+    <ClInclude Include="Render\BRenderer.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\MixPass.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\Auxiliary\Fbx.h">
+      <Filter>Resource\Auxiliary</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\LightPass.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\BAnimator_Factory.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Logic\dllmain.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\pch.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Tool\TMathTool.cpp">
+      <Filter>Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX\DX_App.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX\DX_Information.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Auxiliary\DDSTextureLoader.cpp">
+      <Filter>Render\Auxiliary</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\BasePass.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\BDeferredRendering.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\BGPU_Resource_Factory.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\BResource_Heap.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\Model\RObject_Model.cpp">
+      <Filter>Resource\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\Model\RSkeleton_Model.cpp">
+      <Filter>Resource\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\Model\RStatic_Model.cpp">
+      <Filter>Resource\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RCamera.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RLight.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RMaterial.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RTexture.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Window\BProcess.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Window\BWindow.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\AResource_Factory.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\ARender_Scene_Factory.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\BRenderer.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ARenderer_Factory.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\MixPass.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\Auxiliary\Fbx.cpp">
+      <Filter>Resource\Auxiliary</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool\TTimer.cpp">
+      <Filter>Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\LightPass.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\BAnimator_Factory.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

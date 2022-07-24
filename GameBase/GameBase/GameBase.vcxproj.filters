@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{0b5c31b2-0adb-4ad4-95e8-15be001342f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Object">
+      <UniqueIdentifier>{2fb3910e-14eb-402e-afeb-627b544ef464}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Sence">
+      <UniqueIdentifier>{5a662e74-0b14-4cd3-9ac3-8624f49fa9ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Tool">
+      <UniqueIdentifier>{ef8eef2c-4f11-4892-89ec-7005e6ac83a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Logic">
+      <UniqueIdentifier>{d7e7ee79-efdd-4dba-9f85-334c8981b641}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\ABase_Define.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\ABase_Factory.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\ACharacter_Factory.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\ACreature.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\AMonster_Factory.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\AWeapon_Factory.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\GCharacter.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\GMonster.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Object\GWeapon.h">
+      <Filter>Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Sence\AGrid_Factory.h">
+      <Filter>Game\Sence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Sence\ASence_Factory.h">
+      <Filter>Game\Sence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Sence\GGrid.h">
+      <Filter>Game\Sence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Sence\GSence.h">
+      <Filter>Game\Sence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Sence\GWeapons_Depot.h">
+      <Filter>Game\Sence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Tool\TMathTool.h">
+      <Filter>Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Base\Tool\TTimer.h">
+      <Filter>Game\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Logic\LMaker_System.h">
+      <Filter>Game\Logic</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\ABase_Factory.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\ACharacter_Factory.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\ACreature.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\AMonster_Factory.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\AWeapon_Factory.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\GCharacter.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\GMonster.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Object\GWeapon.cpp">
+      <Filter>Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Sence\AGrid_Factory.cpp">
+      <Filter>Game\Sence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Sence\ASence_Factory.cpp">
+      <Filter>Game\Sence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Sence\GGrid.cpp">
+      <Filter>Game\Sence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Sence\GSence.cpp">
+      <Filter>Game\Sence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Sence\GWeapons_Depot.cpp">
+      <Filter>Game\Sence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Tool\TMathTool.cpp">
+      <Filter>Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Base\Tool\TTimer.cpp">
+      <Filter>Game\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="Logic\LMaker_System.cpp">
+      <Filter>Game\Logic</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
