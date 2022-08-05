@@ -25,30 +25,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 
 	//Object
 	{
-		AObject_Model* AObjectmodel;
-		AResource_Factory Resourcefactory;
-		AObjectmodel = Resourcefactory.CreateSkeletonModel();
-		Resourcefactory.LoadFbx(AObjectmodel, L"FBXResouce\\FBXa\\");
-		//Material
-		int Matnums = AObjectmodel->Materialnums;
-		std::vector<AMaterial*> Materialgroup = {};
-		Materialgroup.assign(Matnums, nullptr);
-		for (int i = 0; i < Matnums; i++)
-		{
-			Materialgroup[i] = Resourcefactory.CreateMaterial();
-		}
-		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
-		//ObjCB
-		AObjectmodel->Transform[0] = 0.0f;
-		AObjectmodel->Transform[1] = 0.0f;
-		AObjectmodel->Transform[2] = -50.0f;
-		AObjectmodel->Rotation[0] = 3.15f;
-		AObjectmodel->Rotation[1] = 0.0f;
-		AObjectmodel->Rotation[2] = 0.0f;
-		AObjectmodel->Scale[0] = 0.04f;
-		AObjectmodel->Scale[1] = 0.04f;
-		AObjectmodel->Scale[2] = 0.04f;
-		Ars->Skeletongroup.push_back(AObjectmodel);
+		//AObject_Model* AObjectmodel;
+		//AResource_Factory Resourcefactory;
+		//AObjectmodel = Resourcefactory.CreateSkeletonModel();
+		//Resourcefactory.LoadFbx(AObjectmodel, L"FBXResouce\\FBXa\\");
+		////Material
+		//int Matnums = AObjectmodel->Materialnums;
+		//std::vector<AMaterial*> Materialgroup = {};
+		//Materialgroup.assign(Matnums, nullptr);
+		//for (int i = 0; i < Matnums; i++)
+		//{
+		//	Materialgroup[i] = Resourcefactory.CreateMaterial();
+		//}
+		//Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
+		////ObjCB
+		//AObjectmodel->Transform[0] = 0.0f;
+		//AObjectmodel->Transform[1] = 0.0f;
+		//AObjectmodel->Transform[2] = -50.0f;
+		//AObjectmodel->Rotation[0] = 3.15f;
+		//AObjectmodel->Rotation[1] = 0.0f;
+		//AObjectmodel->Rotation[2] = 0.0f;
+		//AObjectmodel->Scale[0] = 0.04f;
+		//AObjectmodel->Scale[1] = 0.04f;
+		//AObjectmodel->Scale[2] = 0.04f;
+		//Ars->Skeletongroup.push_back(AObjectmodel);
 	}
 	{
 		AObject_Model* AObjectmodel;
@@ -62,6 +62,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		for (int i = 0; i < Matnums; i++)
 		{
 			Materialgroup[i] = Resourcefactory.CreateMaterial();
+			Materialgroup[i]->SetLightColor({ 0.4f ,0.2f, 0.052f *i});
 		}
 		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
 		//ObjCB
@@ -74,6 +75,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		AObjectmodel->Scale[0] = 0.1f;
 		AObjectmodel->Scale[1] = 0.1f;
 		AObjectmodel->Scale[2] = 0.1f;
+		Ars->Skeletongroup.push_back(AObjectmodel);
+	}
+
+	{
+		AObject_Model* AObjectmodel;
+		AResource_Factory Resourcefactory;
+		AObjectmodel = Resourcefactory.CreateStaticModel();
+		Resourcefactory.LoadFbx(AObjectmodel, L"FBXResouce\\FBXPlane\\");
+		//Material
+		int Matnums = AObjectmodel->Materialnums;
+		std::vector<AMaterial*> Materialgroup = {};
+		Materialgroup.assign(Matnums, nullptr);
+		for (int i = 0; i < Matnums; i++)
+		{
+			Materialgroup[i] = Resourcefactory.CreateMaterial();
+			Materialgroup[i]->SetLightColor({ 0.9 ,0.9,0.9 });
+
+		}
+		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
+		//ObjCB
+		AObjectmodel->Transform[0] = 0.0f;
+		AObjectmodel->Transform[1] = -0.008f;
+		AObjectmodel->Transform[2] = 0.0f;
+		AObjectmodel->Rotation[0] = 0.0f;
+		AObjectmodel->Rotation[1] = 0.0f;
+		AObjectmodel->Rotation[2] = 0.0f;
+		AObjectmodel->Scale[0] = 100.0f;
+		AObjectmodel->Scale[1] = 100.0f;
+		AObjectmodel->Scale[2] = 100.0f;
 		Ars->Skeletongroup.push_back(AObjectmodel);
 	}
 

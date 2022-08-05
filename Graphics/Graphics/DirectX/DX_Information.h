@@ -1,6 +1,6 @@
 #pragma once
 #include "Pre_Define.h"
-#include "Render/BResource_Heap.h"
+#include "DirectX/BResource_Heap.h"
 
 //#include "Render/Auxiliary/FrameResource.h"
 #include "TMathTool.h"

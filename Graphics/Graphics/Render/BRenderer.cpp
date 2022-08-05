@@ -1,4 +1,7 @@
-
+#ifdef  DLL_GRAPHICS_API
+#else
+#define DLL_GRAPHICS_API _declspec(dllexport)
+#endif
 #include "Render/BRenderer.h"
 
 void DebugOnMouseDown(WPARAM btnState, int x, int y);
@@ -135,6 +138,7 @@ void BRenderer::Render(RRender_Scene* IRenderscene)
 	}
 	//场景相机 灯光等GPU常量刷新
 	GPUResourcefactory.UpdateGPUScene(IRenderscene);
+
 
 	//动画刷新
 	AniamtionUpdate(IRenderscene);

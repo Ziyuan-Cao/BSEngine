@@ -115,7 +115,7 @@ public:
 
 	};
 
-	BGPU_Upload_Resource<RMaterial>* GetMaterialConstantsGPU()
+	BGPU_Upload_Resource<AMaterial::MaterialData>* GetMaterialConstantsGPU()
 	{
 		return MaterialconstantsGPU;
 	}
@@ -163,7 +163,7 @@ protected:
 	UINT Vertexbufferbytesize = 0;
 
 	//材质堆
-	BGPU_Upload_Resource<RMaterial>* MaterialconstantsGPU = nullptr;
+	BGPU_Upload_Resource<AMaterial::MaterialData>* MaterialconstantsGPU = nullptr;
 	//子物体矩阵堆
 	BGPU_Upload_Resource<RObject_Model::ObjectConstant>* ObjectconstantsGPU = nullptr;
 	//子物体

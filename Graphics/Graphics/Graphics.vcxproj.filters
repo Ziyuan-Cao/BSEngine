@@ -66,9 +66,6 @@
     <ClInclude Include="Render\BGPU_Resource_Factory.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Render\BResource_Heap.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="Render\Pass.h">
       <Filter>Render</Filter>
     </ClInclude>
@@ -118,6 +115,9 @@
     <ClInclude Include="Render\BAnimator_Factory.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="DirectX\BResource_Heap.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Logic\dllmain.cpp">
@@ -145,9 +145,6 @@
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Render\BGPU_Resource_Factory.cpp">
-      <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\BResource_Heap.cpp">
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Resource\Model\RObject_Model.cpp">
@@ -203,6 +200,9 @@
     </ClCompile>
     <ClCompile Include="Render\BAnimator_Factory.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX\BResource_Heap.cpp">
+      <Filter>DirectX</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

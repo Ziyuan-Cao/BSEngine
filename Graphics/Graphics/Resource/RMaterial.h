@@ -4,5 +4,5 @@
 class  RMaterial : public AMaterial
 {
 public:
-
+	MaterialData GetMaterialData();
 };

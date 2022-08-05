@@ -89,7 +89,7 @@ bool AResource_Factory::LoadFbx(AObject_Model* IOObjectmodel, std::wstring IFile
     Fbx myFbx;
     std::string Fbxpath = GetFbxFile(IFilename);
     if (Fbxpath.empty()) return false;
-    myFbx.ReadFbx(Fbxpath.c_str());
+    myFbx.ReadFbx(Fbxpath.c_str(), IOObjectmodel->hasAnimation);
 
     RObject_Model* Objectmodel = (RObject_Model*)IOObjectmodel;
 

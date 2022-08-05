@@ -13,7 +13,7 @@ void BGPU_Resource_Factory::AssignGPUObject(
 
     //MatCB
     UINT Matnumber = IObject_Model->CPUMeshdata.Materialgroup.size();
-    IObject_Model->MaterialconstantsGPU = new BGPU_Upload_Resource<RMaterial>(IDevice, Matnumber, true);
+    IObject_Model->MaterialconstantsGPU = new BGPU_Upload_Resource<AMaterial::MaterialData>(IDevice, Matnumber, true);
     UpdateGPUMaterials(IObject_Model);
     //ObjCB
     IObject_Model->ObjectconstantsGPU = new BGPU_Upload_Resource<RObject_Model::ObjectConstant>(IDevice, Matnumber, true);
@@ -185,6 +185,22 @@ void BGPU_Resource_Factory::UpdateGPUScene(RRender_Scene* IOGPUScene)
     Scenecontants.Lights[2].Strength = { 0.2f, 0.2f, 0.2f };
 
     IOGPUScene->SceneconstantsGPU->CopyData(0, Scenecontants);
+
+
+    for (int i = 0 ; i < IOGPUScene->Staticgroup.size();i++)
+    {
+        auto object = (RObject_Model*)IOGPUScene->Staticgroup[i];
+        UpdateGPUMaterials(object);
+        UpdateGPUObjectCB(object);
+    }
+
+    for (int i = 0; i < IOGPUScene->Skeletongroup.size(); i++)
+    {
+        auto object = (RObject_Model*)IOGPUScene->Skeletongroup[i];
+        UpdateGPUMaterials(object);
+        UpdateGPUObjectCB(object);
+    }
+
 }
 
 ID3D12Resource* BGPU_Resource_Factory::CreateDefaultBuffer(
@@ -249,6 +265,9 @@ ID3D12Resource* BGPU_Resource_Factory::CreateDefaultBuffer(
     return Defaultbuffer;
 }
 
+
+
+
 void BGPU_Resource_Factory::UpdateGPUMaterials(RObject_Model* IObject_Model)
 {
     auto currMaterialbuffer = IObject_Model->GetMaterialConstantsGPU();
@@ -256,12 +275,12 @@ void BGPU_Resource_Factory::UpdateGPUMaterials(RObject_Model* IObject_Model)
     int Matnumber = IObject_Model->CPUMeshdata.Materialgroup.size();
     for (int i = 0; i < Matnumber;i++)//each materials
     {
-        RMaterial* mat = IObject_Model->CPUMeshdata.Materialgroup[i];
+        auto mat = IObject_Model->CPUMeshdata.Materialgroup[i]->GetMaterialData();
 
-        currMaterialbuffer->CopyData(i, *mat);
-
+        currMaterialbuffer->CopyData(i, mat);
     }
 }
+
 void BGPU_Resource_Factory::UpdateGPUObjectCB(RObject_Model* IObject_Model)
 {
     auto currObjectCB = IObject_Model->GetObjectConstantsGPU();

@@ -1,8 +1,4 @@
 #pragma once
-#ifdef  DLL_GRAPHICS_API
-#else
-#define DLL_GRAPHICS_API _declspec(dllexport)
-#endif
 #include "BGraphics.h"
 #include "DirectX/DX_App.h"
 #include "Render/BDeferredRendering.h"
@@ -12,7 +8,7 @@
 
 
 
-class DLL_GRAPHICS_API BRenderer : public ARenderer
+class BRenderer : public ARenderer
 {
 public:
 

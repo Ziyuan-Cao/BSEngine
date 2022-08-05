@@ -115,7 +115,7 @@ ps_output PS(VertexOut pin)
 
 	//Basecolor
 	//float4 BaseColor = gTextureMaps[textureMapIndex].Sample(gsamPointWrap, pin.TexC);//baseColor
-	float4 BaseColor = float4(0.9, gMaterialIndex * 0.12, 0.9, 1);
+	float4 BaseColor = float4(matData.LightColor.r, matData.LightColor.g, matData.LightColor.b, 1);
 
 	//Normal
 	pin.NormalW = normalize(pin.NormalW);

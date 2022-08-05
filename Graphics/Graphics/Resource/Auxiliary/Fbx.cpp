@@ -106,9 +106,9 @@ void Fbx::PrintFbx()
  * Main function - loads the hard-coded fbx file,
  * and prints its contents in an xml format to stdout.
  */
-bool Fbx::ReadFbx(const char* lFilename)
+bool Fbx::ReadFbx(const char* lFilename, bool IhasAnime)
 {
-    
+
     // Destroy the SDK manager and all the other objects it was handling.
     //if(lSdkManager)
         //lSdkManager->Destroy();
@@ -123,7 +123,7 @@ bool Fbx::ReadFbx(const char* lFilename)
     FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
 
     // Use the first argument as the filename for the importer.
-    if (!lImporter->Initialize(lFilename, -1, lSdkManager->GetIOSettings())) 
+    if (!lImporter->Initialize(lFilename, -1, lSdkManager->GetIOSettings()))
     {
         printf("Call to FbxImporter::Initialize() failed.\n");
         printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
@@ -149,21 +149,24 @@ bool Fbx::ReadFbx(const char* lFilename)
         return false;
     }
 
+
     FbxNode* lRootNode = lScene->GetRootNode();
 
     ProcessSkeletonHeirarchy(lRootNode);
 
     ProcessNode(lRootNode);
 
-    PAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
-    FbxArray<FbxString*> mAnimStackNameArray;
-    lScene->FillAnimStackNameArray(mAnimStackNameArray);
-    if (PAnimStack)
+    if (IhasAnime)
     {
-        FbxString animstackname = PAnimStack->GetName();
-        PAnimInfo = lScene->GetTakeInfo(*(mAnimStackNameArray[1]));
+        PAnimStack = lScene->GetSrcObject<FbxAnimStack>(0);
+        FbxArray<FbxString*> mAnimStackNameArray;
+        lScene->FillAnimStackNameArray(mAnimStackNameArray);
+        if (PAnimStack)
+        {
+            FbxString animstackname = PAnimStack->GetName();
+            PAnimInfo = lScene->GetTakeInfo(*(mAnimStackNameArray[1]));
+        }
     }
-
     return true;
 }
 

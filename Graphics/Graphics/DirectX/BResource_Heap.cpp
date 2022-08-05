@@ -1,4 +1,4 @@
-#include "Render/BResource_Heap.h"
+#include "DirectX/BResource_Heap.h"
 
 void BResource_Heap::AddResource(std::string name,
     D3D12_RESOURCE_DESC & resourceDesc,

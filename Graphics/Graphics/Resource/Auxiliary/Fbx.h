@@ -33,7 +33,7 @@ public:
 	std::map<unsigned long,int> pSkeletongroupIndexmap;
 	
 
-	bool ReadFbx(const char* lFilename);
+	bool ReadFbx(const char* lFilename, bool IhasAnime);
 	void ReadVertex(int ctrlPointIndex, DirectX::XMFLOAT3* pVertex);
 	void ReadColor(int ctrlPointIndex, int vertexCounter, DirectX::XMFLOAT4* pColor);
 	bool ReadUV(int ctrlPointIndex, int textureUVIndex, int uvLayer, DirectX::XMFLOAT2* pUV);

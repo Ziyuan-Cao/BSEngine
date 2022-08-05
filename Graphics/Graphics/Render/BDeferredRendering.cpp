@@ -36,7 +36,16 @@ void BDeferredRendering::Render(
 	Lightpass->Update();
 
 	Basepass->Draw(IDevice, ICmdList, IRenderscene);
+	
 	Lightpass->Draw(IDevice, ICmdList, IRenderscene);
+
+	//reflection
+
+	//SSAO
+
+	//
+
+
 	Mixpass->Draw(IDevice, ICmdList, IRenderscene, ORendertarget, ORendertargetView);
 }
 

@@ -1,5 +1,8 @@
 #pragma once 
-
+#ifdef  DLL_GRAPHICS_API
+#else
+#define DLL_GRAPHICS_API _declspec(dllexport)
+#endif
 #include "Resource/RRender_Scene.h"
 #include "Render/Auxiliary/BGPU_Upload_Resource.h"
 //为资源管理分配GPU内存资源

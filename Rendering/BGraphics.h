@@ -35,25 +35,38 @@ extern "C"
 
 	class AMaterial : public AResource
 	{
-	//需要全改成方法？？？
 	public:
-		DirectX::XMFLOAT3 Lightcolor = { 1.0f, 1.0f, 1.0f };
-		DirectX::XMFLOAT3 Specularcolor = { 1.0f, 1.0f, 1.0f };
-		DirectX::XMFLOAT3 Shadowcolor = { 0.5f, 0.5f, 0.5f };
-		DirectX::XMFLOAT3 Profilecolor = { 0.0f, 0.0f, 0.0f };
-		float Thick = 0.f;
-		float Shadowsmooth = 0.1f;
-		float Shadowsoft = 0.1f;
-		float Specularsmooth = 0.1f;
-		float Specularsoft = 0.1f;
+		struct MaterialData
+		{
+			DirectX::XMFLOAT3 Lightcolor = { 1.0f, 1.0f, 1.0f };
+			DirectX::XMFLOAT3 Specularcolor = { 1.0f, 1.0f, 1.0f };
+			DirectX::XMFLOAT3 Shadowcolor = { 0.5f, 0.5f, 0.5f };
+			DirectX::XMFLOAT3 Profilecolor = { 0.0f, 0.0f, 0.0f };
+			float Thick = 0.f;
+			float Shadowsmooth = 0.1f;
+			float Shadowsoft = 0.1f;
+			float Specularsmooth = 0.1f;
+			float Specularsoft = 0.1f;
 
-		float Depthstrength = 0.5f;
-		float Depthdistance = 3.0f;
-		float Normalstrength = 10.0f;
-		float Normaldistance = 5.0f;
+			float Depthstrength = 0.5f;
+			float Depthdistance = 3.0f;
+			float Normalstrength = 10.0f;
+			float Normaldistance = 5.0f;
 
-		// Used in texture mapping.
-		//DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+			// Used in texture mapping.
+			//DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+		};
+
+	protected:
+		MaterialData Materialdata;
+
+	public:
+		
+		void SetLightColor(DirectX::XMFLOAT3 ILightcolor)
+		{
+			Materialdata.Lightcolor = ILightcolor;
+		}
+
 	};
 
 	class  ALight : public AResource
