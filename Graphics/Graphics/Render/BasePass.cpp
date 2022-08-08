@@ -142,7 +142,7 @@ void BasePass::BuildDescriptorHeaps(ID3D12Device* IDevice)
 {
     //create SRV DescriptorHeap
     //每画一个物体要用对应的贴图堆描述符
-    //目前只要一张阴影图？？
+    // 使用贴图堆紧凑内存，优化速度
     D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
     srvHeapDesc.NumDescriptors = 1;
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -172,19 +172,6 @@ void BasePass::BuildDescriptorHeaps(ID3D12Device* IDevice)
 //缺阴影？
 void BasePass::CreateDescriptors(ID3D12Device* IDevice)
 {
-    //fill out the heap with descriptors
-    //CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(SRVHeap->GetCPUDescriptorHandleForHeapStart());
-
-    //load 2D textures
-    //D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    //srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    //srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    //srvDesc.Texture2D.MostDetailedMip = 0;
-    //srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-    //srvDesc.Format = (*texture_it)->Resource->GetDesc().Format;
-    //srvDesc.Texture2D.MipLevels = (*texture_it)->Resource->GetDesc().MipLevels;
-    //DXInf->md3dDevice->CreateShaderResourceView((*texture_it)->Resource.Get(), &srvDesc, hDescriptor);
-    //hDescriptor.Offset(1, DXInf->mCbvSrvUavDescriptorSize);
 
     ReloadDescriptors(IDevice);
 }
@@ -195,11 +182,9 @@ void BasePass::ReloadDescriptors(ID3D12Device* IDevice)
     DX_Information* DXInf = DX_Information::GetInstance();
 
     //阴影？？
-    //auto srvCpuStart = SRVHeap->GetCPUDescriptorHandleForHeapStart();
-    //auto shadowmapSrv = CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, 0, DXInf->mCbvSrvUavDescriptorSize);
-    //DXInf->md3dDevice->CreateShaderResourceView(DXInf->Resourceheap->GetResource("ShadowMap"),
-    //    &DXInf->Resourceheap->GetSRVDesc("ShadowMap"),
-    //    shadowmapSrv);
+    IDevice->CreateShaderResourceView(DXInf->Resourceheap->GetResource("ShadowBuffer"),
+        DXInf->Resourceheap->GetSRVDesc("ShadowBuffer"),
+        SRVHeap->GetCPUDescriptorHandleForHeapStart());
 
     //RTV
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(RTVHeap->GetCPUDescriptorHandleForHeapStart());
@@ -228,10 +213,10 @@ void BasePass::BuildRootSignature(ID3D12Device* IDevice)
     DX_Information* DXInf = DX_Information::GetInstance();
 
     CD3DX12_DESCRIPTOR_RANGE texTable0;
-    texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+    texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 1);
 
     // Root parameter can be a table, root descriptor or root constants.
-    CD3DX12_ROOT_PARAMETER slotRootParameter[3];
+    CD3DX12_ROOT_PARAMETER slotRootParameter[4];
 
     // Perfomance TIP: Order from most frequent to least frequent.
     //ObjCB
@@ -241,7 +226,8 @@ void BasePass::BuildRootSignature(ID3D12Device* IDevice)
     //MatCB
     slotRootParameter[2].InitAsShaderResourceView(0, 1);//gMaterialData : register(t0, space1);
     //ShadowMap
-    //slotRootParameter[3].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);// gShadowMap : register(t1);
+    slotRootParameter[3].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);//gShadowMap : register(t0,space2);
+
     //Texture...                                                                    
     //slotRootParameter[4].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);// gCubeMap : register(t0);
     //slotRootParameter[5].InitAsDescriptorTable(1, &texTable2, D3D12_SHADER_VISIBILITY_PIXEL);// gTextureMaps[10] : register(t2); 
@@ -249,7 +235,7 @@ void BasePass::BuildRootSignature(ID3D12Device* IDevice)
     auto staticSamplers = DXInf->GetStaticSamplers();
 
     // A root signature is an array of root parameters.
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(3, slotRootParameter,
+    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(4, slotRootParameter,
         (UINT)staticSamplers.size(), staticSamplers.data(),
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -330,9 +316,8 @@ void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
 {
     DX_Information* DXInf = DX_Information::GetInstance();
 
-    //ID3D12DescriptorHeap* descriptorHeaps[] = { SRVHeap };
-
-    //ICmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+    ID3D12DescriptorHeap* descriptorHeaps[] = { SRVHeap };
+    ICmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
     ICmdList->SetGraphicsRootSignature(RootSignature);
 
@@ -343,7 +328,9 @@ void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
     ICmdList->SetGraphicsRootConstantBufferView(1, passCB->Resource()->GetGPUVirtualAddress());
 
     //Shadow
-    //ICmdList->SetGraphicsRootDescriptorTable(3, SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    //auto shadowBuffer = DXInf->Resourceheap->GetResource("ShadowBuffer")->GetGPUVirtualAddress();
+    //ICmdList->SetGraphicsRootShaderResourceView(3, shadowBuffer);
+    ICmdList->SetGraphicsRootDescriptorTable(3, SRVHeap->GetGPUDescriptorHandleForHeapStart());
 
     ICmdList->RSSetViewports(1, DXInf->GetScreenViewport());
     ICmdList->RSSetScissorRects(1, DXInf->GetScissorRect());
@@ -403,10 +390,10 @@ void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
    
 void BasePass::DrawRenderItem(ID3D12GraphicsCommandList* ICmdList, const RRender_Scene::RenderItem& IRenderitem)
 {
-    UINT objCBByteSize = MathHelper::CalcConstantBufferByteSize(sizeof(RObject_Model::ObjectConstant));
+    UINT objCBByteSize = IRenderitem.Objectmodel->GetObjectConstantsGPU()->GetElementbytesize();
     D3D12_GPU_VIRTUAL_ADDRESS ObjCBaddress = IRenderitem.Objectmodel->GetObjectConstantsGPU()->Resource()->GetGPUVirtualAddress();
 
-    UINT matCBByteSize = MathHelper::CalcConstantBufferByteSize(sizeof(RMaterial));
+    UINT matCBByteSize = IRenderitem.Objectmodel->GetMaterialConstantsGPU()->GetElementbytesize();
     D3D12_GPU_VIRTUAL_ADDRESS MatCBaddress = IRenderitem.Objectmodel->GetMaterialConstantsGPU()->Resource()->GetGPUVirtualAddress();
 
     const std::vector<RObject_Model::GPUMeshData>& Renderitem = IRenderitem.Objectmodel->GetGPUGeometries();
@@ -425,9 +412,9 @@ void BasePass::DrawRenderItem(ID3D12GraphicsCommandList* ICmdList, const RRender
         D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = ObjCBaddress + i * objCBByteSize;
         ICmdList->SetGraphicsRootConstantBufferView(0, objCBAddress);
 
-        //MatCB
+        //MatCB 
         auto matBuffer = MatCBaddress + i * matCBByteSize;
-        ICmdList->SetGraphicsRootShaderResourceView(2, matBuffer);
+        ICmdList->SetGraphicsRootShaderResourceView(2, MatCBaddress);
 
 
         //当统一顶点和索引时可用这个

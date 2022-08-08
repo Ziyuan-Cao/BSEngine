@@ -28,6 +28,10 @@ class RRender_Scene : public ARender_Scene
 {
 	friend class BGPU_Resource_Factory;
 public:
+
+	RRender_Scene();
+
+
 	virtual void UpdateMaterial() override {};
 
 	virtual void UpdateLight() override {};
@@ -61,7 +65,7 @@ public:
 		// indices [NUM_DIR_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHTS) are point lights;
 		// indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
 		// are spot lights for a maximum of MaxLights per object.
-		RLight::LightData Lights[MaxLights];
+		//RLight::LightData Lights[MaxLights];
 	};
 
 	//渲染物体组
@@ -79,11 +83,28 @@ public:
 		return SceneconstantsGPU;
 	}
 
+
+	BGPU_Upload_Resource<ALight::LightData>* GetLightsGPU()
+	{
+		return LightGPU;
+	}
+
+
+	DirectX::BoundingSphere GetSceneBounds()
+	{
+		return SceneBounds;
+	}
+
 	const std::vector<RenderItem>& GetRenderItems() const { return Renderitems; };
 
 protected:
+
+	DirectX::BoundingSphere SceneBounds;
+
 	//需要锁
 	BGPU_Upload_Resource<SceneConstants>* SceneconstantsGPU = nullptr;
+	
+	BGPU_Upload_Resource <ALight::LightData> * LightGPU = nullptr;
 
 	//Game中构建
 	std::vector<RenderItem> Renderitems;

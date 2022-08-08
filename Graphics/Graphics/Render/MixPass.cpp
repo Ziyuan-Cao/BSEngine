@@ -21,7 +21,7 @@ void MixPass::Draw(ID3D12Device* IDevice,
 
     ICmdList->SetPipelineState(PSOs["Mix"]);
 
-    ICmdList->SetGraphicsRootConstantBufferView(0, DXInf->Resourceheap->GetResource("mViewCB")->GetGPUVirtualAddress());
+    //ICmdList->SetGraphicsRootConstantBufferView(0, DXInf->Resourceheap->GetResource("mViewCB")->GetGPUVirtualAddress());
 
     auto passCB = IRenderscene->GetSceneConstantsGPU();
     ICmdList->SetGraphicsRootConstantBufferView(1, passCB->Resource()->GetGPUVirtualAddress());

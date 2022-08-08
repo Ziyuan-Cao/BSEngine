@@ -129,7 +129,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;C:\Users\曹\source\repos\BSEngine\Rendering;C:\Users\曹\source\repos\BSEngine\Graphics\Graphics;C:\Users\曹\source\repos\BSEngine\Base\Tool;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\曹\source\repos\BSEngine;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;C:\Users\曹\source\repos\BSEngine\Rendering;C:\Users\曹\source\repos\BSEngine\Graphics\Graphics;C:\Users\曹\source\repos\BSEngine\Base\Tool;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -179,6 +179,7 @@
     <ClInclude Include="Render\LightPass.h" />
     <ClInclude Include="Render\MixPass.h" />
     <ClInclude Include="Render\Pass.h" />
+    <ClInclude Include="Render\ShadowPass.h" />
     <ClInclude Include="Resource\Auxiliary\Fbx.h" />
     <ClInclude Include="Resource\Model\RObject_Model.h" />
     <ClInclude Include="Resource\Model\RSkeleton_Model.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="Render\BRenderer.cpp" />
     <ClCompile Include="Render\LightPass.cpp" />
     <ClCompile Include="Render\MixPass.cpp" />
+    <ClCompile Include="Render\ShadowPass.cpp" />
     <ClCompile Include="Resource\ARender_Scene_Factory.cpp" />
     <ClCompile Include="Resource\Auxiliary\Fbx.cpp" />
     <ClCompile Include="Resource\Model\RObject_Model.cpp" />
@@ -214,8 +216,9 @@
     <ClCompile Include="Resource\Model\RStatic_Model.cpp" />
     <ClCompile Include="Resource\RCamera.cpp" />
     <ClCompile Include="Resource\RLight.cpp" />
-    <ClCompile Include="Resource\RMaterial.cpp" />
     <ClCompile Include="Resource\AResource_Factory.cpp" />
+    <ClCompile Include="Resource\RMaterial.cpp" />
+    <ClCompile Include="Resource\RRender_Scene.cpp" />
     <ClCompile Include="Resource\RTexture.cpp" />
     <ClCompile Include="Tool\TTimer.cpp" />
     <ClCompile Include="Window\BProcess.cpp" />

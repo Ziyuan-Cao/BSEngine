@@ -43,8 +43,9 @@ struct MaterialData
 
 	uint     DiffuseMapIndex;
 	uint     NormalMapIndex;
-	uint LayerIndex;
+	uint	 LayerIndex;
 };
+
 
 //---------------------------------------------------------------------------------------
 // Transforms a normal map sample to world space.

@@ -3,6 +3,7 @@
 #include "BasePass.h"
 #include "LightPass.h"
 #include "MixPass.h"
+#include "ShadowPass.h"
 //#include "Auxiliary/BFrame_Resource.h"
 
 //ÑÓ³ÙäÖÈ¾Ö÷Á÷³Ì
@@ -26,6 +27,7 @@ public:
 
 protected:
 
+	ShadowPass* Shadowpass;
 	BasePass* Basepass;
 	LightPass* Lightpass;
 	MixPass* Mixpass;

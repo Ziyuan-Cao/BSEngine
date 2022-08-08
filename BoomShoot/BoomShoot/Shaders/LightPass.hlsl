@@ -1,11 +1,6 @@
 #include "Common.hlsl"
 
-Texture2D SceneDepth: register(t0);
-//StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
-
-Texture2D GBuffer[5] : register(t1);
-
-cbuffer cbPass : register(b1)
+cbuffer cbPass : register(b0)
 {
     float4x4 gView;
     float4x4 gInvView;
@@ -23,9 +18,19 @@ cbuffer cbPass : register(b1)
     float gTotalTime;
     float gDeltaTime;
     float4 gAmbientLight;
-
-    Light gLights[MaxLights];
 };
+
+StructuredBuffer<Light> gLights : register(t0, space1);
+
+//space 0°²×°Ë³ÐòÍùºó¶Á
+Texture2D SceneDepth: register(t1);
+//StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
+
+Texture2D GBuffer[5] : register(t1, space1);
+
+
+
+
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
@@ -44,8 +49,6 @@ struct vs_out {
 	float4 position : SV_POSITION;
 	float2 texcoord : TEXCOORD;
 };
-
-
 
 vs_out  VS(vs_in vIn)
 {
@@ -182,7 +185,7 @@ float4 PS(vs_out pIn) : SV_TARGET
     //MaterialData matData = gMaterialData[meterialId];
     //uint Renderlayer = matData.LayerIndex;
     float4 Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
-    Color = PhysicalRender(pIn);
+    Color = PhysicalRender(pIn) *  GBuffer[2][pIn.position.xy].x;
     //Color = Opaque_catoonlights(pIn);
     //switch (Renderlayer)
     //{

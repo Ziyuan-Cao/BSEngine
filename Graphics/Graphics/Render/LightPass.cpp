@@ -1,60 +1,5 @@
 #include "LightPass.h"
 
-void LightPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, RRender_Scene* IRenderscene)
-{
-    DX_Information* DXInf = DX_Information::GetInstance();
-
-    CD3DX12_RESOURCE_BARRIER Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("LightMap"),
-        D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-    ICmdList->ResourceBarrier(1, &Resourcebarrier);
-
-    //Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
-    //    D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
-    //ICmdList->ResourceBarrier(1, &Resourcebarrier);
-
-    ID3D12DescriptorHeap* descriptorHeaps[] = { SRVHeap };
-
-    ICmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-    ICmdList->SetGraphicsRootSignature(RootSignature);
-
-    ICmdList->SetPipelineState(PSOs["light"]);
-
-    ICmdList->SetGraphicsRootConstantBufferView(0, DXInf->Resourceheap->GetResource("mViewCB")->GetGPUVirtualAddress());
-    
-    //SenceCB
-    auto passCB = IRenderscene->GetSceneConstantsGPU();
-    ICmdList->SetGraphicsRootConstantBufferView(1, passCB->Resource()->GetGPUVirtualAddress());
-
-    //auto matBuffer = DXInf->mCurrFrameResource->MaterialBuffer->Resource();
-    //ICmdList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
-
-    CD3DX12_GPU_DESCRIPTOR_HANDLE depthDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
-    depthDescriptor.Offset(mDepthIndex, DXInf->CbvSrvUavDescriptorsize);
-    ICmdList->SetGraphicsRootDescriptorTable(2, depthDescriptor);
-
-    ICmdList->SetGraphicsRootDescriptorTable(3, SRVHeap->GetGPUDescriptorHandleForHeapStart());
-    
-
-    ICmdList->ClearRenderTargetView(RTVHeap->GetCPUDescriptorHandleForHeapStart(), DXInf->Clearcolor, 0, nullptr);
-    
-    D3D12_CPU_DESCRIPTOR_HANDLE CPUDeschandle = RTVHeap->GetCPUDescriptorHandleForHeapStart();
-
-    ICmdList->OMSetRenderTargets(1, &CPUDeschandle, true, nullptr);
-
-    ICmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    ICmdList->IASetVertexBuffers(0, 1, &VbView);
-    ICmdList->DrawInstanced(4, 1, 0, 0);
-
-    Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("LightMap"),
-        D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-
-    ICmdList->ResourceBarrier(1, &Resourcebarrier);
-
-}
-
-
 void LightPass::VertexsAndIndexesInput()
 {
     struct ScreenQuadVertex
@@ -219,16 +164,17 @@ void LightPass::BuildRootSignature(ID3D12Device* IDevice)
 {
     DX_Information* DXInf = DX_Information::GetInstance();
 
-    CD3DX12_DESCRIPTOR_RANGE range[2];
-    range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-    range[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 1);
+    CD3DX12_DESCRIPTOR_RANGE descriptorRange[2];
+    descriptorRange[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+    descriptorRange[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 1,1);
 
     CD3DX12_ROOT_PARAMETER rootParameters[4];
-    rootParameters[0].InitAsConstantBufferView(0);
-    rootParameters[1].InitAsConstantBufferView(1);
+    //rootParameters[0].InitAsConstantBufferView(0); //MVB
+    rootParameters[0].InitAsConstantBufferView(0); //Senceconstant
+    rootParameters[1].InitAsShaderResourceView(0,1); //Light
     //rootParameters[2].InitAsShaderResourceView(0, 1);//gMaterialData : register(t0, space1);
-    rootParameters[2].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParameters[3].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[2].InitAsDescriptorTable(1, &descriptorRange[0], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[3].InitAsDescriptorTable(1, &descriptorRange[1], D3D12_SHADER_VISIBILITY_PIXEL);
     auto staticSamplers = DXInf->GetStaticSamplers();
 
     CD3DX12_ROOT_SIGNATURE_DESC descRootSignature;
@@ -294,42 +240,102 @@ void LightPass::BuildPSO(ID3D12Device* IDevice)
 
 void LightPass::CreateCB()
 {
-    DX_Information* DXInf = DX_Information::GetInstance();
+    //DX_Information* DXInf = DX_Information::GetInstance();
 
-    //CD3DX12_HEAP_PROPERTIES heapProperty(D3D12_HEAP_TYPE_UPLOAD);
-    D3D12_RESOURCE_DESC resourceDesc;
-    ZeroMemory(&resourceDesc, sizeof(resourceDesc));
-    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    resourceDesc.Alignment = 0;
-    resourceDesc.SampleDesc.Count = 1;
-    resourceDesc.SampleDesc.Quality = 0;
-    resourceDesc.MipLevels = 1;
-    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-    resourceDesc.DepthOrArraySize = 1;
-    resourceDesc.Width = sizeof(RCamera::CameraData);
-    resourceDesc.Height = 1;
-    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    
-    DXInf->Resourceheap->AddResource("mViewCB",
-        resourceDesc,
-        &Cameradata,
-        sizeof(RCamera::CameraData),
-        D3D12_HEAP_TYPE_UPLOAD,
-        D3D12_RESOURCE_STATE_GENERIC_READ);
+    ////CD3DX12_HEAP_PROPERTIES heapProperty(D3D12_HEAP_TYPE_UPLOAD);
+    //D3D12_RESOURCE_DESC resourceDesc;
+    //ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+    //resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    //resourceDesc.Alignment = 0;
+    //resourceDesc.SampleDesc.Count = 1;
+    //resourceDesc.SampleDesc.Quality = 0;
+    //resourceDesc.MipLevels = 1;
+    //resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+    //resourceDesc.DepthOrArraySize = 1;
+    //resourceDesc.Width = sizeof(RCamera::CameraData);
+    //resourceDesc.Height = 1;
+    //resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    //
+    //DXInf->Resourceheap->AddResource("mViewCB",
+    //    resourceDesc,
+    //    &Cameradata,
+    //    sizeof(RCamera::CameraData),
+    //    D3D12_HEAP_TYPE_UPLOAD,
+    //    D3D12_RESOURCE_STATE_GENERIC_READ);
 
 }
 
 void LightPass::UpdateConstantBuffer()
 {
-    DX_Information* DXInf = DX_Information::GetInstance();
+    //DX_Information* DXInf = DX_Information::GetInstance();
 
-    void* mapped = nullptr;
-    DXInf->Resourceheap->GetResource("mViewCB")->Map(0, nullptr, &mapped);
-    memcpy(mapped, &Cameradata, sizeof(RCamera::CameraData));
-    DXInf->Resourceheap->GetResource("mViewCB")->Unmap(0, nullptr);
+    //void* mapped = nullptr;
+    //DXInf->Resourceheap->GetResource("mViewCB")->Map(0, nullptr, &mapped);
+    //memcpy(mapped, &Cameradata, sizeof(RCamera::CameraData));
+    //DXInf->Resourceheap->GetResource("mViewCB")->Unmap(0, nullptr);
 }
 
 void LightPass::Update()
 {
     UpdateConstantBuffer();
 }
+
+
+void LightPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, RRender_Scene* IRenderscene)
+{
+    DX_Information* DXInf = DX_Information::GetInstance();
+
+    CD3DX12_RESOURCE_BARRIER Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("LightMap"),
+        D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+    ICmdList->ResourceBarrier(1, &Resourcebarrier);
+
+    //Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
+    //    D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+    //ICmdList->ResourceBarrier(1, &Resourcebarrier);
+
+    ID3D12DescriptorHeap* descriptorHeaps[] = { SRVHeap };
+
+    ICmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+    ICmdList->SetGraphicsRootSignature(RootSignature);
+
+    ICmdList->SetPipelineState(PSOs["light"]);
+
+    //ICmdList->SetGraphicsRootConstantBufferView(0, DXInf->Resourceheap->GetResource("mViewCB")->GetGPUVirtualAddress());
+
+    //SenceCB
+    auto passCB = IRenderscene->GetSceneConstantsGPU();
+    ICmdList->SetGraphicsRootConstantBufferView(0, passCB->Resource()->GetGPUVirtualAddress());
+
+    //Light
+    auto LightCB = IRenderscene->GetLightsGPU();
+    ICmdList->SetGraphicsRootShaderResourceView(1, LightCB->Resource()->GetGPUVirtualAddress());
+
+    //auto matBuffer = DXInf->mCurrFrameResource->MaterialBuffer->Resource();
+    //ICmdList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
+
+    CD3DX12_GPU_DESCRIPTOR_HANDLE depthDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    depthDescriptor.Offset(mDepthIndex, DXInf->CbvSrvUavDescriptorsize);
+    ICmdList->SetGraphicsRootDescriptorTable(2, depthDescriptor);
+
+    ICmdList->SetGraphicsRootDescriptorTable(3, SRVHeap->GetGPUDescriptorHandleForHeapStart());
+
+
+    ICmdList->ClearRenderTargetView(RTVHeap->GetCPUDescriptorHandleForHeapStart(), DXInf->Clearcolor, 0, nullptr);
+
+    D3D12_CPU_DESCRIPTOR_HANDLE CPUDeschandle = RTVHeap->GetCPUDescriptorHandleForHeapStart();
+
+    ICmdList->OMSetRenderTargets(1, &CPUDeschandle, true, nullptr);
+
+    ICmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    ICmdList->IASetVertexBuffers(0, 1, &VbView);
+    ICmdList->DrawInstanced(4, 1, 0, 0);
+
+    Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("LightMap"),
+        D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+
+    ICmdList->ResourceBarrier(1, &Resourcebarrier);
+
+}
+

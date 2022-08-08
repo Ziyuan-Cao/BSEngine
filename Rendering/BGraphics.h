@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Base/Tool/TMathTool.h"
 #include <DirectXMath.h>
 #include <string>
 #include <vector>
@@ -24,8 +25,6 @@ using namespace DirectX;
 extern "C" 
 {
 #endif
-
-
 
 	class AResource
 	{
@@ -54,7 +53,11 @@ extern "C"
 			float Normaldistance = 5.0f;
 
 			// Used in texture mapping.
-			//DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+			DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+
+			UINT     DiffuseMapIndex = 0;
+			UINT     NormalMapIndex = 0;
+			UINT	 LayerIndex = 0;
 		};
 
 	protected:
@@ -62,7 +65,7 @@ extern "C"
 
 	public:
 		
-		void SetLightColor(DirectX::XMFLOAT3 ILightcolor)
+		void SetLightColor(DirectX::XMFLOAT3 ILightcolor) 
 		{
 			Materialdata.Lightcolor = ILightcolor;
 		}
@@ -71,7 +74,6 @@ extern "C"
 
 	class  ALight : public AResource
 	{
-	//需要全改成方法？？？
 	public:
 		struct LightData
 		{

@@ -38,6 +38,8 @@ public:
     int Clientwidth = 800;
     int Clientheight = 600;
 
+
+
     D3D12_VIEWPORT Screenviewport;//need init
     D3D12_RECT Scissorrect;
 

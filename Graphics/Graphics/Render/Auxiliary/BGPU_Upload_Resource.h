@@ -56,11 +56,16 @@ public:
 
     void CopyData(int elementIndex, const T& data)
     {
-        memcpy(&Mappeddata[elementIndex*Elementbytesize], &data, sizeof(T));
+        memcpy(&Mappeddata[elementIndex*Elementbytesize], &data, Elementbytesize);
     }
     void Copy(void* data)
     {
         memcpy(&Mappeddata[0], data, Memorysize);
+    }
+
+    UINT GetElementbytesize()
+    {
+        return Elementbytesize;
     }
 
 private:

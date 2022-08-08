@@ -84,9 +84,6 @@
     <ClInclude Include="Resource\RLight.h">
       <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Resource\RMaterial.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
     <ClInclude Include="Resource\RRender_Scene.h">
       <Filter>Resource</Filter>
     </ClInclude>
@@ -117,6 +114,12 @@
     </ClInclude>
     <ClInclude Include="DirectX\BResource_Heap.h">
       <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\RMaterial.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ShadowPass.h">
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -162,9 +165,6 @@
     <ClCompile Include="Resource\RLight.cpp">
       <Filter>Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Resource\RMaterial.cpp">
-      <Filter>Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Resource\RTexture.cpp">
       <Filter>Resource</Filter>
     </ClCompile>
@@ -203,6 +203,15 @@
     </ClCompile>
     <ClCompile Include="DirectX\BResource_Heap.cpp">
       <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RMaterial.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ShadowPass.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\RRender_Scene.cpp">
+      <Filter>Resource</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

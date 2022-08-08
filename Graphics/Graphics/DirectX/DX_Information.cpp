@@ -35,6 +35,8 @@ void DX_Information::OnResize()
     Screenviewport.MaxDepth = 1.0f;
 
     Scissorrect = { 0, 0, Clientwidth, Clientheight };
+
+
 }
 
 

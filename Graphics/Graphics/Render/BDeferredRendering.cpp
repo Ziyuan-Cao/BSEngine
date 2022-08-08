@@ -8,7 +8,9 @@ BDeferredRendering::BDeferredRendering(
 	Basepass = new BasePass();
 	Lightpass = new LightPass();
 	Mixpass = new MixPass();
+	Shadowpass = new ShadowPass();
 
+	Shadowpass->OnResize(IDevice, ICmdList);
 	Basepass->OnResize(IDevice, ICmdList);
 	Lightpass->OnResize(IDevice, ICmdList);
 	Mixpass->OnResize(IDevice, ICmdList);
@@ -18,6 +20,7 @@ BDeferredRendering::BDeferredRendering(
 void BDeferredRendering::Initialize(ID3D12Device* IDevice,
 	ID3D12GraphicsCommandList* ICmdList)
 {
+	Shadowpass->Initialize(IDevice, ICmdList);
 	Basepass->Initialize(IDevice, ICmdList);
 	Lightpass->Initialize(IDevice, ICmdList);
 	Mixpass->Initialize(IDevice, ICmdList);
@@ -33,7 +36,9 @@ void BDeferredRendering::Render(
 	ID3D12Resource* ORendertarget,
 	D3D12_CPU_DESCRIPTOR_HANDLE ORendertargetView)
 {
-	Lightpass->Update();
+	Shadowpass->UpdateShadowConstant(IRenderscene, (RLight*)IRenderscene->Lightgroup[0]);
+
+	Shadowpass->Draw(IDevice, ICmdList, IRenderscene);
 
 	Basepass->Draw(IDevice, ICmdList, IRenderscene);
 	
@@ -44,7 +49,6 @@ void BDeferredRendering::Render(
 	//SSAO
 
 	//
-
 
 	Mixpass->Draw(IDevice, ICmdList, IRenderscene, ORendertarget, ORendertargetView);
 }

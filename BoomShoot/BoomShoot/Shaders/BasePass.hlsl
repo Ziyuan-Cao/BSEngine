@@ -1,7 +1,8 @@
 #include "Common.hlsl"
-// Put in space1, so the texture array does not overlap with these resources.  
-// The texture array will occupy registers t0, t1, ..., t3 in space0. 
+ 
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
+
+Texture2D gShadowMap: register(t1, space1);
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
@@ -40,12 +41,6 @@ cbuffer cbPass : register(b1)
 	float gTotalTime;
 	float gDeltaTime;
 	float4 gAmbientLight;
-
-	// Indices [0, NUM_DIR_LIGHTS) are directional lights;
-	// indices [NUM_DIR_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHTS) are point lights;
-	// indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
-	// are spot lights for a maximum of MaxLights per object.
-	Light gLights[MaxLights];
 };
 
 struct VertexIn
@@ -77,6 +72,41 @@ struct ps_output
 	float4 GBufferE : SV_TARGET4;
 };
 
+float CalcShadowFactor(float4 shadowPosH)
+{
+	// Complete projection by doing division by w.
+	shadowPosH.xyz /= shadowPosH.w;
+
+	// Depth in NDC space.
+	//点在阴影图中的深度 比图黑则照得到 ，比图白则被遮住
+	float depth = shadowPosH.z;
+
+	uint width, height, numMips;
+	gShadowMap.GetDimensions(0, width, height, numMips);
+
+	// Texel size.
+	float dx = 1.0f / (float)width;
+
+	float percentLit = 0.0f;
+	const float2 offsets[9] =
+	{
+		float2(-dx,  -dx), float2(0.0f,  -dx), float2(dx,  -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx,  +dx), float2(0.0f,  +dx), float2(dx,  +dx)
+	};
+
+	[unroll]
+	for (int i = 0; i < 9; ++i)
+	{
+		//变黑0.005使得顶点不于阴影图重叠，导致的交错
+		percentLit += gShadowMap.SampleCmpLevelZero(gsamShadow,
+			shadowPosH.xy + offsets[i], depth - 0.005).r;
+	}
+
+	return percentLit / 9.0f;
+}
+
+
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout = (VertexOut)0.0f;
@@ -101,6 +131,7 @@ VertexOut VS(VertexIn vin)
 	vout.TexC = mul(texC, matData.MatTransform).xy;
 
 	// Generate projective tex-coords to project shadow map onto scene.
+	//将点投影到阴影图中
 	vout.ShadowPosH = mul(posW, gShadowTransform);
 	vout.MaterialId = vin.MaterialId;
 	return vout;
@@ -124,7 +155,7 @@ ps_output PS(VertexOut pin)
 
 	//Shadowfactors
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	//shadowFactor[0] = CalcShadowFactor(pin.ShadowPosH);//shadow
+	shadowFactor[0] = CalcShadowFactor(pin.ShadowPosH);//shadow
 
 	//WorldPosition
 	float3 WorldPosition = pin.PosW;

@@ -13,7 +13,7 @@ void BGPU_Resource_Factory::AssignGPUObject(
 
     //MatCB
     UINT Matnumber = IObject_Model->CPUMeshdata.Materialgroup.size();
-    IObject_Model->MaterialconstantsGPU = new BGPU_Upload_Resource<AMaterial::MaterialData>(IDevice, Matnumber, true);
+    IObject_Model->MaterialconstantsGPU = new BGPU_Upload_Resource<AMaterial::MaterialData>(IDevice, Matnumber, false);
     UpdateGPUMaterials(IObject_Model);
     //ObjCB
     IObject_Model->ObjectconstantsGPU = new BGPU_Upload_Resource<RObject_Model::ObjectConstant>(IDevice, Matnumber, true);
@@ -127,65 +127,29 @@ void BGPU_Resource_Factory::ReleaseGPUObject(
     //...
 }
 
+/// <summary>
+/// 为灯光和场景常量申请GPU资源
+/// </summary>
+/// <param name="IDevice"></param>
+/// <param name="IOGPUScene"></param>
 void BGPU_Resource_Factory::AssignGPUScene(
     ID3D12Device* IDevice,
     RRender_Scene* IOGPUScene
 )
 {
+    int lightsnum = IOGPUScene->Lightgroup.size();
+
     //帧资源多个对应多线程？？？2
-    IOGPUScene->SceneconstantsGPU = new BGPU_Upload_Resource<RRender_Scene::SceneConstants>(IDevice,2,true);
+    IOGPUScene->SceneconstantsGPU = new BGPU_Upload_Resource<RRender_Scene::SceneConstants>(IDevice,1,true);
+
+    IOGPUScene->LightGPU = new BGPU_Upload_Resource<ALight::LightData>(IDevice, lightsnum, false);
+
 }
 
 void BGPU_Resource_Factory::UpdateGPUScene(RRender_Scene* IOGPUScene)
 {
-    RRender_Scene::SceneConstants Scenecontants;
-    
-    RCamera* Camera = (RCamera*)IOGPUScene->Cameragroup[0];
-
-    //???强制转换？
-    XMMATRIX view = Camera->GetView();
-    XMMATRIX proj = Camera->GetProj();
-
-    XMMATRIX viewProj = XMMatrixMultiply(view, proj);
-
-    XMVECTOR matrixview = XMMatrixDeterminant(view);
-    XMVECTOR matrixproj = XMMatrixDeterminant(proj);
-    XMVECTOR matrixviewproj = XMMatrixDeterminant(viewProj);
-
-    XMMATRIX invView = XMMatrixInverse(&matrixview, view);
-    XMMATRIX invProj = XMMatrixInverse(&matrixproj, proj);
-    XMMATRIX invViewProj = XMMatrixInverse(&matrixviewproj, viewProj);
-    //???
-    //XMMATRIX shadowTransform = XMLoadFloat4x4(0);
-
-    XMStoreFloat4x4(&Scenecontants.View, XMMatrixTranspose(view));
-    XMStoreFloat4x4(&Scenecontants.InvView, XMMatrixTranspose(invView));
-    XMStoreFloat4x4(&Scenecontants.Proj, XMMatrixTranspose(proj));
-    XMStoreFloat4x4(&Scenecontants.InvProj, XMMatrixTranspose(invProj));
-    XMStoreFloat4x4(&Scenecontants.ViewProj, XMMatrixTranspose(viewProj));
-    XMStoreFloat4x4(&Scenecontants.InvViewProj, XMMatrixTranspose(invViewProj));
-    //XMStoreFloat4x4(&Scenecontants.ShadowTransform, XMMatrixTranspose(shadowTransform));
-
-
-    //???强制转换？
-    Scenecontants.EyePosW = ((RCamera*)IOGPUScene->Cameragroup[0])->GetPosition3f();
-    //Scenecontants.RenderTargetSize = XMFLOAT2((float)d3dApp->mClientWidth, (float)d3dApp->mClientHeight);
-    //Scenecontants.InvRenderTargetSize = XMFLOAT2(1.0f / d3dApp->mClientWidth, 1.0f / d3dApp->mClientHeight);
-    Scenecontants.NearZ = 1.0f;
-    Scenecontants.FarZ = 1000.0f;
-    //Scenecontants.TotalTime = gt.TotalTime();
-    //Scenecontants.DeltaTime = gt.DeltaTime();
-    //should be fixed in lightPass
-    Scenecontants.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-    Scenecontants.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-    Scenecontants.Lights[0].Strength = { 0.9f, 0.8f, 0.7f };
-    Scenecontants.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
-    Scenecontants.Lights[1].Strength = { 0.4f, 0.4f, 0.4f };
-    Scenecontants.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
-    Scenecontants.Lights[2].Strength = { 0.2f, 0.2f, 0.2f };
-
-    IOGPUScene->SceneconstantsGPU->CopyData(0, Scenecontants);
-
+    UpdateGPUSceneCB(IOGPUScene);
+    UpdateGPULightCB(IOGPUScene);
 
     for (int i = 0 ; i < IOGPUScene->Staticgroup.size();i++)
     {
@@ -265,7 +229,64 @@ ID3D12Resource* BGPU_Resource_Factory::CreateDefaultBuffer(
     return Defaultbuffer;
 }
 
+void BGPU_Resource_Factory::UpdateGPULightCB(RRender_Scene* IOGPUScene)
+{
+    int lightsnum = IOGPUScene->Lightgroup.size();
 
+    for (int i = 0; i < lightsnum; i++)
+    {
+        IOGPUScene->LightGPU->CopyData(i, IOGPUScene->Lightgroup[i]->Lightdata);
+    }
+}
+
+void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene)
+{
+    RRender_Scene::SceneConstants Scenecontants;
+
+    RCamera* Camera = (RCamera*)IOGPUScene->Cameragroup[0];
+
+    //???强制转换？
+    XMMATRIX view = Camera->GetView();
+    XMMATRIX proj = Camera->GetProj();
+
+    XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+
+    XMVECTOR matrixview = XMMatrixDeterminant(view);
+    XMVECTOR matrixproj = XMMatrixDeterminant(proj);
+    XMVECTOR matrixviewproj = XMMatrixDeterminant(viewProj);
+
+    XMMATRIX invView = XMMatrixInverse(&matrixview, view);
+    XMMATRIX invProj = XMMatrixInverse(&matrixproj, proj);
+    XMMATRIX invViewProj = XMMatrixInverse(&matrixviewproj, viewProj);
+
+    //Shadow
+    RLight::LightNFWVPT lightNFWVPT;
+    ((RLight*)IOGPUScene->Lightgroup[0])->GetLightMatrix(IOGPUScene->GetSceneBounds(), lightNFWVPT);
+    XMMATRIX shadowTransform = XMLoadFloat4x4(&lightNFWVPT.mShadowTransform);
+
+    XMStoreFloat4x4(&Scenecontants.View, XMMatrixTranspose(view));
+    XMStoreFloat4x4(&Scenecontants.InvView, XMMatrixTranspose(invView));
+    XMStoreFloat4x4(&Scenecontants.Proj, XMMatrixTranspose(proj));
+    XMStoreFloat4x4(&Scenecontants.InvProj, XMMatrixTranspose(invProj));
+    XMStoreFloat4x4(&Scenecontants.ViewProj, XMMatrixTranspose(viewProj));
+    XMStoreFloat4x4(&Scenecontants.InvViewProj, XMMatrixTranspose(invViewProj));
+    XMStoreFloat4x4(&Scenecontants.ShadowTransform, XMMatrixTranspose(shadowTransform));
+
+
+    //???强制转换？
+    Scenecontants.EyePosW = ((RCamera*)IOGPUScene->Cameragroup[0])->GetPosition3f();
+    //Scenecontants.RenderTargetSize = XMFLOAT2((float)d3dApp->mClientWidth, (float)d3dApp->mClientHeight);
+    //Scenecontants.InvRenderTargetSize = XMFLOAT2(1.0f / d3dApp->mClientWidth, 1.0f / d3dApp->mClientHeight);
+    Scenecontants.NearZ = 1.0f;
+    Scenecontants.FarZ = 1000.0f;
+    //Scenecontants.TotalTime = gt.TotalTime();
+    //Scenecontants.DeltaTime = gt.DeltaTime(); 
+    //should be fixed in lightPass
+    Scenecontants.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
+
+    IOGPUScene->SceneconstantsGPU->CopyData(0, Scenecontants);
+
+}
 
 
 void BGPU_Resource_Factory::UpdateGPUMaterials(RObject_Model* IObject_Model)

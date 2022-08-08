@@ -24,8 +24,6 @@ private:
 
 	RCamera::CameraData* Cameradata;
 
-	DirectX::BoundingSphere mSceneBounds;
-
 	//ComPtr<ID3D12Resource> mViewCB;
 	//ComPtr<ID3D12Resource> mLightCB;
 	//ComPtr<ID3D12Resource> mDsTexture;

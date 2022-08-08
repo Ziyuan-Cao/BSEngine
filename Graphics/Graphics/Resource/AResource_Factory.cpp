@@ -1,4 +1,9 @@
-#include "BGraphics.h"
+
+#ifdef  DLL_GRAPHICS_API
+#else
+#define DLL_GRAPHICS_API _declspec(dllexport)
+#endif
+
 #include "RTexture.h"
 #include "Model/RStatic_Model.h"
 #include "Model/RSkeleton_Model.h"

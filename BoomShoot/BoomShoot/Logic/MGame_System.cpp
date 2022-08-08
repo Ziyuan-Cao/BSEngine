@@ -62,7 +62,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		for (int i = 0; i < Matnums; i++)
 		{
 			Materialgroup[i] = Resourcefactory.CreateMaterial();
-			Materialgroup[i]->SetLightColor({ 0.4f ,0.2f, 0.052f *i});
+			Materialgroup[i]->SetLightColor({ 0.09f *i,0.4f, 0.4f });
 		}
 		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
 		//ObjCB
@@ -90,23 +90,44 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		for (int i = 0; i < Matnums; i++)
 		{
 			Materialgroup[i] = Resourcefactory.CreateMaterial();
-			Materialgroup[i]->SetLightColor({ 0.9 ,0.9,0.9 });
+			Materialgroup[i]->SetLightColor({ 0.4 ,0.4, 0.4 });
 
 		}
 		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
 		//ObjCB
 		AObjectmodel->Transform[0] = 0.0f;
-		AObjectmodel->Transform[1] = -0.008f;
+		AObjectmodel->Transform[1] = 0.0f;
 		AObjectmodel->Transform[2] = 0.0f;
-		AObjectmodel->Rotation[0] = 0.0f;
+		AObjectmodel->Rotation[0] = 0.0001f;
 		AObjectmodel->Rotation[1] = 0.0f;
 		AObjectmodel->Rotation[2] = 0.0f;
-		AObjectmodel->Scale[0] = 100.0f;
-		AObjectmodel->Scale[1] = 100.0f;
-		AObjectmodel->Scale[2] = 100.0f;
+		AObjectmodel->Scale[0] = 50.0f;
+		AObjectmodel->Scale[1] = 50.0f;
+		AObjectmodel->Scale[2] = 50.0f;
 		Ars->Skeletongroup.push_back(AObjectmodel);
 	}
 
+	//Lights
+	{
+		ALight* light;
+		AResource_Factory Resourcefactory;
+
+		light = Resourcefactory.CreateLight();
+		//light->Lightdata.Direction = { 0.57735f, -0.57735f, 0.57735f };
+		light->Lightdata.Direction = { 0.8f, -0.8f, 0.8f };
+		light->Lightdata.Strength = { 0.9f, 0.8f, 0.7f };
+		Ars->Lightgroup.push_back(light);
+
+		light = Resourcefactory.CreateLight();
+		light->Lightdata.Direction = { -0.57735f, -0.57735f, 0.57735f };
+		light->Lightdata.Strength = { 0.4f, 0.4f, 0.4f };
+		Ars->Lightgroup.push_back(light);
+
+		light = Resourcefactory.CreateLight();
+		light->Lightdata.Direction = { 0.0f, -0.707f, -0.707f };
+		light->Lightdata.Strength = { 0.2f, 0.2f, 0.2f };
+		Ars->Lightgroup.push_back(light);
+	}
 
 	//Camera
 	{

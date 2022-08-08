@@ -1,8 +1,4 @@
 #pragma once 
-#ifdef  DLL_GRAPHICS_API
-#else
-#define DLL_GRAPHICS_API _declspec(dllexport)
-#endif
 #include "Resource/RRender_Scene.h"
 #include "Render/Auxiliary/BGPU_Upload_Resource.h"
 //为资源管理分配GPU内存资源
@@ -40,7 +36,9 @@ public:
         );
 
     void UpdateGPUScene(RRender_Scene* IOGPUScene);
-
+    
+    void UpdateGPULightCB(RRender_Scene* IOGPUScene);
+    void UpdateGPUSceneCB(RRender_Scene* IOGPUScene);
     void UpdateGPUMaterials(RObject_Model* IObject_Model);
     void UpdateGPUObjectCB(RObject_Model* IObject_Model);
     void UpdateGPUVertexCB( RSkeleton_Model* IObject_Model);
