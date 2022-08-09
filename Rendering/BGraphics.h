@@ -111,7 +111,7 @@ extern "C"
 		//Debug
 		bool isStatic = true;
 		bool hasAnimation = false;
-
+		bool caseShadow = true;
 		int Materialnums = 0;
 
 		//×ø±êÏµ¾ØÕó

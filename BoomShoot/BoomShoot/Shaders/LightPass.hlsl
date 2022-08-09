@@ -185,7 +185,7 @@ float4 PS(vs_out pIn) : SV_TARGET
     //MaterialData matData = gMaterialData[meterialId];
     //uint Renderlayer = matData.LayerIndex;
     float4 Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
-    Color = PhysicalRender(pIn) *  GBuffer[2][pIn.position.xy].x;
+    Color = PhysicalRender(pIn) *  (GBuffer[2][pIn.position.xy].x + 0.4);
     //Color = Opaque_catoonlights(pIn);
     //switch (Renderlayer)
     //{

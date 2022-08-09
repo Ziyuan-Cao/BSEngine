@@ -86,24 +86,43 @@ float CalcShadowFactor(float4 shadowPosH)
 
 	// Texel size.
 	float dx = 1.0f / (float)width;
+	float dy = 1.0f / (float)height;
 
 	float percentLit = 0.0f;
 	const float2 offsets[9] =
 	{
-		float2(-dx,  -dx), float2(0.0f,  -dx), float2(dx,  -dx),
+		float2(-dx,  -dy), float2(0.0f,  -dy), float2(dx,  -dy),
 		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-		float2(-dx,  +dx), float2(0.0f,  +dx), float2(dx,  +dx)
+		float2(-dx,  +dy), float2(0.0f,  +dy), float2(dx,  +dy)
 	};
 
-	[unroll]
-	for (int i = 0; i < 9; ++i)
+	//变黑0.005使得顶点不于阴影图重叠，导致的交错
+	percentLit = gShadowMap.SampleCmpLevelZero(gsamShadow,
+		shadowPosH.xy, depth - 0.005).r;
+
+	//???
+	if (shadowPosH.x >= 0.80 || shadowPosH.x < 0.15)
 	{
-		//变黑0.005使得顶点不于阴影图重叠，导致的交错
-		percentLit += gShadowMap.SampleCmpLevelZero(gsamShadow,
-			shadowPosH.xy + offsets[i], depth - 0.005).r;
+		percentLit = 1;
 	}
 
-	return percentLit / 9.0f;
+	if (shadowPosH.y >= 0.80 || shadowPosH.y < 0.15)
+	{
+		percentLit = 1;
+	}
+
+	//percentLit = percentLit * step(0, 1.0 - shadowPosH.x) * step(0, 1.0 - shadowPosH.y);
+
+
+	return percentLit;
+	//[unroll]
+	//for (int i = 0; i < 9; ++i)
+	//{
+	//	//变黑0.005使得顶点不于阴影图重叠，导致的交错
+	//	percentLit += gShadowMap.SampleCmpLevelZero(gsamShadow,
+	//		shadowPosH.xy + offsets[i], depth - 0.005).r;
+	//}
+	//return percentLit / 9.0f;
 }
 
 

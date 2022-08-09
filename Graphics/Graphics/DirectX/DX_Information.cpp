@@ -5,11 +5,12 @@ using namespace DirectX::PackedVector;
 
 DX_Information* DX_Information::DXInfinstance = nullptr;
 
-DX_Information::DX_Information(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICommandList)
+DX_Information::DX_Information(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICommandList , UINT IW, UINT IH)
 {
 
     //mCamera.SetLens(0.25f * MathHelper::Pi, 16.0f / 9.0f, 0.5f, 1000.0f);
-
+    Clientwidth = IW;
+    Clientheight = IH;
     Resourceheap = new BResource_Heap(IDevice);
 
     RtvDescriptorsize = IDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);

@@ -118,8 +118,8 @@ void LightPass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
     resourceDesc.MipLevels = 1;
 
     resourceDesc.DepthOrArraySize = 1;
-    resourceDesc.Width = DXInf->Clientwidth;
-    resourceDesc.Height = DXInf->Clientheight;
+    resourceDesc.Width = DXInf->GetWClientWidth();
+    resourceDesc.Height = DXInf->GetWClientHeight();
     resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 

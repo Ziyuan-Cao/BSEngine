@@ -93,12 +93,14 @@ void BAnimator_Factory::AnimationCPUUpdate(RSkeleton_Model* IOSkeletonObject, co
 					1);
 
 				vertex = XMVector4Transform(vertex, lClusterDeformation[vertexindex]);
+
 				
 				float x = XMVectorGetX(vertex);
 				float y = XMVectorGetY(vertex);
 				float z = XMVectorGetZ(vertex);
 
 				Vertexcurrent[vertexindex].Position = XMFLOAT3(x, y, z);
+				
 			}
 
 		}

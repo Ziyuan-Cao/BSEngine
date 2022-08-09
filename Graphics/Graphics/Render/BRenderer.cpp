@@ -27,7 +27,7 @@ void  BRenderer::RenderInitialize()
 	DXInstance->Initialize(width, height);
 
 	//Ìî³ääÖÈ¾ÐÅÏ¢
-	DXInfinstance = new DX_Information(DXInstance->GetDevice(), DXInstance->GetCommandList());
+	DXInfinstance = new DX_Information(DXInstance->GetDevice(), DXInstance->GetCommandList(),width,height);
 
 	DFInstance = new BDeferredRendering(DXInstance->GetDevice(), DXInstance->GetCommandList());
 
@@ -50,7 +50,7 @@ void BRenderer::RenderInitialize(HINSTANCE IHINSTANCE, UINT IWidth, UINT IHeight
 	ID3D12CommandAllocator* CmdAllocator = DXInstance->GetCommandAllocator();
 
 	//Ìî³ääÖÈ¾ÐÅÏ¢
-	DXInfinstance = new DX_Information(Device, CmdList);
+	DXInfinstance = new DX_Information(Device, CmdList, width, height);
 	DFInstance = new BDeferredRendering(Device, CmdList);
 
 	DXInstance->ExecuteCommandList();

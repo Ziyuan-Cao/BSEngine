@@ -41,8 +41,8 @@ void BasePass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
 
 
     resourceDesc.DepthOrArraySize = 1;
-    resourceDesc.Width = DXInf->Clientwidth;
-    resourceDesc.Height = DXInf->Clientheight;
+    resourceDesc.Width = DXInf->GetWClientWidth();
+    resourceDesc.Height = DXInf->GetWClientHeight();
     resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
     resourceDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -88,8 +88,8 @@ void BasePass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
     D3D12_RESOURCE_DESC depthStencilDesc;
     depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     depthStencilDesc.Alignment = 0;
-    depthStencilDesc.Width = DXInf->Clientwidth;
-    depthStencilDesc.Height = DXInf->Clientheight;
+    depthStencilDesc.Width = DXInf->GetWClientWidth();
+    depthStencilDesc.Height = DXInf->GetWClientHeight();
     depthStencilDesc.DepthOrArraySize = 1;
     depthStencilDesc.MipLevels = 1;
     depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;

@@ -37,15 +37,17 @@ void ShadowPass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
     depthStencilDesc.Height = ShadowBufferHeight;
     depthStencilDesc.DepthOrArraySize = 1;
     depthStencilDesc.MipLevels = 1;
-    depthStencilDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+    depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
 
-    depthStencilDesc.SampleDesc.Count = DXInf->Msaa4xstate ? 4 : 1;
-    depthStencilDesc.SampleDesc.Quality = DXInf->Msaa4xstate ? (DXInf->Msaa4xquality - 1) : 0;
+    depthStencilDesc.SampleDesc.Count = 1;
+    //depthStencilDesc.SampleDesc.Count = 4;
+    depthStencilDesc.SampleDesc.Quality = 0;
+
     depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
     depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
     D3D12_CLEAR_VALUE optClear;
-    optClear.Format = DXInf->Depthstencilformat;
+    optClear.Format = DXGI_FORMAT_D32_FLOAT;
     optClear.DepthStencil.Depth = 1.0f;
     optClear.DepthStencil.Stencil = 0;
     DXInf->Resourceheap->AddResource("ShadowBuffer",
@@ -58,8 +60,11 @@ void ShadowPass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
 
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
     dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
     dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-    dsvDesc.Format = DXInf->Depthstencilformat;
+    //dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
+
+    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
     dsvDesc.Texture2D.MipSlice = 0;
     DXInf->Resourceheap->CreateDSVDesc("ShadowBuffer", dsvDesc);
 
@@ -67,8 +72,11 @@ void ShadowPass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
     ZeroMemory(&descSRV, sizeof(descSRV));
     descSRV.Texture2D.MipLevels = 1;
     descSRV.Texture2D.MostDetailedMip = 0;
-    descSRV.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    descSRV.Format = DXGI_FORMAT_R32_FLOAT;
+
     descSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    //descSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
+
     descSRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     DXInf->Resourceheap->CreateSRVDesc("ShadowBuffer", descSRV);
 }
@@ -168,7 +176,7 @@ void ShadowPass::BuildPSO(ID3D12Device* IDevice)
 
     CD3DX12_RASTERIZER_DESC opaqueRastDesc(D3D12_DEFAULT);
     opaqueRastDesc.CullMode = D3D12_CULL_MODE_NONE;
-
+    //opaqueRastDesc.MultisampleEnable = true;
     D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
     //
     // PSO for opaque objects.
@@ -193,6 +201,10 @@ void ShadowPass::BuildPSO(ID3D12Device* IDevice)
     opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     DXInf->SetPSO(opaquePsoDesc);
     opaquePsoDesc.NumRenderTargets = 1;
+    opaquePsoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+
+    //opaquePsoDesc.SampleDesc.Count = 4;
+    //opaquePsoDesc.SampleDesc.Quality = 0;
 
     ThrowIfFailed(IDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&PSOs["Shadow"])));
 
@@ -284,6 +296,7 @@ void ShadowPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList
     const std::vector<RRender_Scene::RenderItem>& Renderitems = IRenderscene->GetRenderItems();
     for (int i = 0; i < Renderitems.size(); i++)
     {
+        if(Renderitems[i].Objectmodel->caseShadow)
         DrawRenderItem(ICmdList, Renderitems[i]);
     }
 

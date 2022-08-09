@@ -10,6 +10,8 @@ public:
 
 	ShadowPass() : pass() {};
 
+	ShadowPass(UINT W, UINT H) : pass(), ShadowBufferWidth(W), ShadowBufferHeight(H) {};
+
 	void UpdateShadowConstant(RRender_Scene* IRenderscene, RLight * ILight);
 
 	virtual void Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, RRender_Scene* IRenderscene) override;

@@ -15,9 +15,15 @@
 
 class DX_Information
 {
+private:
+
+    int Clientwidth = 800;
+    int Clientheight = 600;
+
+
 public:
     DX_Information() = delete;
-    DX_Information(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICommandList);
+    DX_Information(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICommandList, UINT IW, UINT IH);
 
     static DX_Information* DXInfinstance;
 
@@ -27,6 +33,15 @@ public:
         return DXInfinstance;
     }
 
+    UINT GetWClientWidth()
+    {
+        return Clientwidth;
+    }
+
+    UINT GetWClientHeight()
+    {
+        return Clientheight;
+    }
 
     BResource_Heap* Resourceheap = nullptr;
     //FrameResource* mCurrFrameResource = nullptr;
@@ -34,9 +49,6 @@ public:
     UINT RtvDescriptorsize = 0;
     UINT DsvDescriptorsize = 0;
     UINT CbvSrvUavDescriptorsize = 0;
-
-    int Clientwidth = 800;
-    int Clientheight = 600;
 
 
 

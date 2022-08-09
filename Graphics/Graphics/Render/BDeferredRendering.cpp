@@ -1,14 +1,17 @@
 #include "Render/BDeferredRendering.h"
+#include "DirectX/DX_Information.h"
 
 //初始化过程
 BDeferredRendering::BDeferredRendering(
 	ID3D12Device* IDevice,
 	ID3D12GraphicsCommandList* ICmdList)
 {
+	DX_Information* DXInf = DX_Information::GetInstance();
+
 	Basepass = new BasePass();
 	Lightpass = new LightPass();
 	Mixpass = new MixPass();
-	Shadowpass = new ShadowPass();
+	Shadowpass = new ShadowPass(DXInf->GetWClientWidth(), DXInf->GetWClientHeight());
 
 	Shadowpass->OnResize(IDevice, ICmdList);
 	Basepass->OnResize(IDevice, ICmdList);
