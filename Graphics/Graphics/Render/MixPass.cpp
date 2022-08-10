@@ -21,28 +21,29 @@ void MixPass::Draw(ID3D12Device* IDevice,
 
     ICmdList->SetPipelineState(PSOs["Mix"]);
 
-    //ICmdList->SetGraphicsRootConstantBufferView(0, DXInf->Resourceheap->GetResource("mViewCB")->GetGPUVirtualAddress());
-
+    //Sence Contact
     auto passCB = IRenderscene->GetSceneConstantsGPU();
-    ICmdList->SetGraphicsRootConstantBufferView(1, passCB->Resource()->GetGPUVirtualAddress());
+    ICmdList->SetGraphicsRootConstantBufferView(0, passCB->Resource()->GetGPUVirtualAddress());
 
-    //???
-    //auto matBuffer = d3dApp->mCurrFrameResource->MaterialBuffer->Resource();
-    //ICmdList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
-    
-    CD3DX12_GPU_DESCRIPTOR_HANDLE depthDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
-    depthDescriptor.Offset(DepthIndex, DXInf->CbvSrvUavDescriptorsize);
-    ICmdList->SetGraphicsRootDescriptorTable(3, depthDescriptor);
-
-    //CD3DX12_GPU_DESCRIPTOR_HANDLE profileDescriptor(mSRVHeap->GetGPUDescriptorHandleForHeapStart());
-    //profileDescriptor.Offset(mProfileIndex, DXInf->CbvSrvUavDescriptorsize);
-    //ICmdList->SetGraphicsRootDescriptorTable(4, profileDescriptor);
-
+    //Light
     CD3DX12_GPU_DESCRIPTOR_HANDLE LightDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
     LightDescriptor.Offset(LightIndex, DXInf->CbvSrvUavDescriptorsize);
-    ICmdList->SetGraphicsRootDescriptorTable(5, LightDescriptor);
+    ICmdList->SetGraphicsRootDescriptorTable(1, LightDescriptor);
 
-    ICmdList->SetGraphicsRootDescriptorTable(6, SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    //Depth
+    CD3DX12_GPU_DESCRIPTOR_HANDLE depthDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    depthDescriptor.Offset(DepthIndex, DXInf->CbvSrvUavDescriptorsize);
+    ICmdList->SetGraphicsRootDescriptorTable(2, depthDescriptor);
+
+    //SSAO
+    CD3DX12_GPU_DESCRIPTOR_HANDLE ssaoDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    ssaoDescriptor.Offset(SSAOIndex, DXInf->CbvSrvUavDescriptorsize);
+    ICmdList->SetGraphicsRootDescriptorTable(3, ssaoDescriptor);
+
+    //GBuffer
+    CD3DX12_GPU_DESCRIPTOR_HANDLE GBDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    GBDescriptor.Offset(GBufferIndex, DXInf->CbvSrvUavDescriptorsize);
+    ICmdList->SetGraphicsRootDescriptorTable(4, GBDescriptor);
 
     ICmdList->ClearRenderTargetView(ORendertargetView, Colors::LightSteelBlue, 0, nullptr);
     D3D12_CPU_DESCRIPTOR_HANDLE Currentbackbufferview = ORendertargetView;
@@ -87,7 +88,7 @@ void MixPass::VertexsAndIndexesInput()
 void MixPass::BuildDescriptorHeaps(ID3D12Device* IDevice)
 {
     //create SRV DescriptorHeap
-    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {}; //Gbuffer + DepthSentil + profile + light
+    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {}; //Gbuffer + DepthSentil + light¡¡+ SSAO
     srvHeapDesc.NumDescriptors = GBufferRTCount + 1 + 1 + 1;
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -100,39 +101,16 @@ void MixPass::CreateDescriptors(ID3D12Device* IDevice)
     //fill out the heap with descriptors
     CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(SRVHeap->GetCPUDescriptorHandleForHeapStart());
 
-    for (int i = 0; i < GBufferRTCount; i++) {
-        IDevice->CreateShaderResourceView(
-            DXInf->Resourceheap->GetResource("GBuffer" + std::to_string(i)),
-            DXInf->Resourceheap->GetSRVDesc("GBuffer" + std::to_string(i)),
-            hDescriptor); 
-        hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
-    }
+    LightIndex = 0;
+    DepthIndex = LightIndex + 1;
+    SSAOIndex = DepthIndex + 1;
+    GBufferIndex = SSAOIndex + 1;
 
-    //??
-    //DepthIndex = GBufferRTCount;
-    //ProfileIndex = DepthIndex + 1;
-    //LightIndex = ProfileIndex + 1;
-
-    //IDevice->CreateShaderResourceView(
-    //    DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
-    //    DXInf->Resourceheap->GetSRVDesc("DepthStencilBuffer"),
-    //    hDescriptor);
-    //hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
-
-    //IDevice->CreateUnorderedAccessView(
-    //    DXInf->Resourceheap->GetResource("PostProfileMap"),
-    //    nullptr,
-    //    DXInf->Resourceheap->GetUAVDesc("PostProfileMap"),
-    //    hDescriptor);
-    //hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
-
-    //IDevice->CreateShaderResourceView(
-    //    DXInf->Resourceheap->GetResource("LightMap"),
-    //    DXInf->Resourceheap->GetSRVDesc("LightMap"),
-    //    hDescriptor);
-
-    DepthIndex = GBufferRTCount;
-    LightIndex = DepthIndex + 1;
+    IDevice->CreateShaderResourceView(
+        DXInf->Resourceheap->GetResource("LightMap"),
+        DXInf->Resourceheap->GetSRVDesc("LightMap"),
+        hDescriptor);
+    hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
 
     IDevice->CreateShaderResourceView(
         DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
@@ -141,9 +119,20 @@ void MixPass::CreateDescriptors(ID3D12Device* IDevice)
     hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
 
     IDevice->CreateShaderResourceView(
-        DXInf->Resourceheap->GetResource("LightMap"),
-        DXInf->Resourceheap->GetSRVDesc("LightMap"),
+        DXInf->Resourceheap->GetResource("SSAOMap"),
+        DXInf->Resourceheap->GetSRVDesc("SSAOMap"),
         hDescriptor);
+    hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
+
+    for (int i = 0; i < GBufferRTCount; i++) {
+        IDevice->CreateShaderResourceView(
+            DXInf->Resourceheap->GetResource("GBuffer" + std::to_string(i)),
+            DXInf->Resourceheap->GetSRVDesc("GBuffer" + std::to_string(i)),
+            hDescriptor);
+        hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
+    }
+
+
 }
 
 void MixPass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
@@ -156,23 +145,25 @@ void MixPass::BuildRootSignature(ID3D12Device* IDevice)
     DX_Information* DXInf = DX_Information::GetInstance();
 
     CD3DX12_DESCRIPTOR_RANGE range[4];
-    range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-    range[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
-    range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
-    range[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 2);
-    CD3DX12_ROOT_PARAMETER rootParameters[7];
-    rootParameters[0].InitAsConstantBufferView(0);
-    rootParameters[1].InitAsConstantBufferView(1);
-    rootParameters[2].InitAsShaderResourceView(0, 1);//gMaterialData : register(t0, space1);
-    rootParameters[3].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParameters[4].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParameters[5].InitAsDescriptorTable(1, &range[2], D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParameters[6].InitAsDescriptorTable(1, &range[3], D3D12_SHADER_VISIBILITY_PIXEL);
+    range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);//LightMap
+    range[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);//SceneDepthMap
+    range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2);//ssao
+    range[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 3);//GBuffer
+    CD3DX12_ROOT_PARAMETER rootParameters[5];
+    rootParameters[0].InitAsConstantBufferView(0);//cbPass : register(b0)
+
+    rootParameters[1].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);//LightMap
+
+    rootParameters[2].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);//SceneDepthMap
+
+    rootParameters[3].InitAsDescriptorTable(1, &range[2], D3D12_SHADER_VISIBILITY_PIXEL);//ssao
+
+    rootParameters[4].InitAsDescriptorTable(1, &range[3], D3D12_SHADER_VISIBILITY_PIXEL);//GBuffer
 
     auto staticSamplers = DXInf->GetStaticSamplers();
 
     CD3DX12_ROOT_SIGNATURE_DESC descRootSignature;
-    descRootSignature.Init(7,
+    descRootSignature.Init(5,
         rootParameters,
         (UINT)staticSamplers.size(),
         staticSamplers.data(),

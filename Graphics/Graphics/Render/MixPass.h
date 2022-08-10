@@ -25,6 +25,8 @@ private:
 	ID3D12Resource* LightCB;
 	ID3D12Resource* DsTexture;
 
+	UINT GBufferIndex = 0;
+	UINT SSAOIndex = 0;
 	UINT DepthIndex = 0;
 	UINT ProfileIndex = 0;
 	UINT LightIndex = 0;
