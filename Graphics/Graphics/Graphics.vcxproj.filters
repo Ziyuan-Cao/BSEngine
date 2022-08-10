@@ -121,6 +121,9 @@
     <ClInclude Include="Render\ShadowPass.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\SSAOPass.h">
+      <Filter>Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Logic\dllmain.cpp">
@@ -212,6 +215,9 @@
     </ClCompile>
     <ClCompile Include="Resource\RRender_Scene.cpp">
       <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\SSAOPass.cpp">
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

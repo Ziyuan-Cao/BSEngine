@@ -6,7 +6,7 @@
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 	PSTR cmdLine, int showCmd)
 {
-
+		
 	//Debug
 	wchar_t* path = new wchar_t[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, path);
@@ -25,30 +25,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 
 	//Object
 	{
-		AObject_Model* AObjectmodel;
-		AResource_Factory Resourcefactory;
-		AObjectmodel = Resourcefactory.CreateSkeletonModel();
-		Resourcefactory.LoadFbx(AObjectmodel, L"FBXResouce\\FBXa\\");
-		//Material
-		int Matnums = AObjectmodel->Materialnums;
-		std::vector<AMaterial*> Materialgroup = {};
-		Materialgroup.assign(Matnums, nullptr);
-		for (int i = 0; i < Matnums; i++)
-		{
-			Materialgroup[i] = Resourcefactory.CreateMaterial();
-		}
-		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
-		//ObjCB
-		AObjectmodel->Transform[0] = 0.0f;
-		AObjectmodel->Transform[1] = 0.0f;
-		AObjectmodel->Transform[2] = -50.0f;
-		AObjectmodel->Rotation[0] = 3.15f;
-		AObjectmodel->Rotation[1] = 0.0f;
-		AObjectmodel->Rotation[2] = 0.0f;
-		AObjectmodel->Scale[0] = 0.04f;
-		AObjectmodel->Scale[1] = 0.04f;
-		AObjectmodel->Scale[2] = 0.04f;
-		Ars->Skeletongroup.push_back(AObjectmodel);
+		//AObject_Model* AObjectmodel;
+		//AResource_Factory Resourcefactory;
+		//AObjectmodel = Resourcefactory.CreateSkeletonModel();
+		//Resourcefactory.LoadFbx(AObjectmodel, L"FBXResouce\\FBXa\\");
+		////Material
+		//int Matnums = AObjectmodel->Materialnums;
+		//std::vector<AMaterial*> Materialgroup = {};
+		//Materialgroup.assign(Matnums, nullptr);
+		//for (int i = 0; i < Matnums; i++)
+		//{
+		//	Materialgroup[i] = Resourcefactory.CreateMaterial();
+		//}
+		//Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
+		////ObjCB
+		//AObjectmodel->Transform[0] = 0.0f;
+		//AObjectmodel->Transform[1] = 0.0f;
+		//AObjectmodel->Transform[2] = -50.0f;
+		//AObjectmodel->Rotation[0] = 3.15f;
+		//AObjectmodel->Rotation[1] = 0.0f;
+		//AObjectmodel->Rotation[2] = 0.0f;
+		//AObjectmodel->Scale[0] = 0.04f;
+		//AObjectmodel->Scale[1] = 0.04f;
+		//AObjectmodel->Scale[2] = 0.04f;
+		//Ars->Skeletongroup.push_back(AObjectmodel);
 	}
 	{
 		AObject_Model* AObjectmodel;

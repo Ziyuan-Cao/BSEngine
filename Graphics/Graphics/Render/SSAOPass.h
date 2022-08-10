@@ -5,39 +5,38 @@
 #include<string>
 #include<unordered_map>
 
-class LightPass : public pass
+class SSAOPass : public pass
 {
 public:
 
-	LightPass() : pass() {};
+	SSAOPass() : pass() {};
 
-	virtual void Update();
 	virtual void Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, RRender_Scene* IRenderscene) override;
-
-	//virtual void Initialize() override;
-
-
-	//std::unique_ptr<ShadowMap> mShadowMap;
+	virtual void OnResize(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList) override;
 
 private:
-
-	RCamera::CameraData* Cameradata;
-
-	//ComPtr<ID3D12Resource> mViewCB;
-	//ComPtr<ID3D12Resource> mLightCB;
-	//ComPtr<ID3D12Resource> mDsTexture;
-
-	UINT mDepthIndex = 0;
+	bool Init = false;
 
 	std::unordered_map<std::string, ID3DBlob*> Shaders;
 	std::unordered_map<std::string, ID3D12PipelineState*> PSOs;
 
-	ID3D12Resource *  VB;
 	D3D12_VERTEX_BUFFER_VIEW VbView;
 
+	UINT DepthIndex = 0;
+	UINT NoiseIndex = 0;
+	struct NoiseMap
+	{
+		float data[192];
+	};
+
+	D3D12_SUBRESOURCE_DATA NoiseMapGPUSUBRESOURCE;
+	ID3D12Resource* NoiseMapGPU;
+	ID3D12Resource* textureUploadHeap;
+	D3D12_SHADER_RESOURCE_VIEW_DESC NoiseMapdescSRV;
+
 private:
-	void CreateCB();
-	void UpdateConstantBuffer();
+
+	void BuildNoiseMap(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList);
 
 	virtual void VertexsAndIndexesInput() override;
 	virtual void BuildHeaps(ID3D12GraphicsCommandList* ICmdList) override;
@@ -46,4 +45,5 @@ private:
 	virtual void BuildRootSignature(ID3D12Device* IDevice) override;
 	virtual void BuildShadersAndInputLayout() override;
 	virtual void BuildPSO(ID3D12Device* IDevice) override;
+
 };

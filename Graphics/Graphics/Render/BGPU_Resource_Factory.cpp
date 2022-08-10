@@ -364,7 +364,6 @@ ID3DBlob* BGPU_Resource_Factory::CompileShader(
 
     if (errors != nullptr)
         OutputDebugStringA((char*)errors->GetBufferPointer());
-
     ThrowIfFailed(hr);
 
     return byteCode;

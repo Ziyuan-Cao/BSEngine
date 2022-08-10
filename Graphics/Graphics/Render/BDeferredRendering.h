@@ -4,6 +4,7 @@
 #include "LightPass.h"
 #include "MixPass.h"
 #include "ShadowPass.h"
+#include "SSAOPass.h"
 //#include "Auxiliary/BFrame_Resource.h"
 
 //ÑÓ³ÙäÖÈ¾Ö÷Á÷³Ì
@@ -30,6 +31,7 @@ protected:
 	ShadowPass* Shadowpass;
 	BasePass* Basepass;
 	LightPass* Lightpass;
+	SSAOPass* SSAOpass;
 	MixPass* Mixpass;
 
 };
