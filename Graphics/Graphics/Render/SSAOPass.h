@@ -29,12 +29,26 @@ private:
 		float data[192];
 	};
 
+	struct SSAOcb
+	{
+		XMFLOAT2 screenSize = { 0.0f, 0.0f };
+		XMFLOAT2 noiseScale = { 0.0f, 0.0f };; // tiling
+		float radius = 3.0;
+		float power = 2.0;
+		float kernelSize = 16;
+		XMFLOAT3 SSAOKernel[16];
+	};
+
 	D3D12_SUBRESOURCE_DATA NoiseMapGPUSUBRESOURCE;
 	ID3D12Resource* NoiseMapGPU;
 	ID3D12Resource* textureUploadHeap;
 	D3D12_SHADER_RESOURCE_VIEW_DESC NoiseMapdescSRV;
 
+	BGPU_Upload_Resource<SSAOcb>* SSAOConstant;
+
 private:
+
+	void BuildSSAOCB(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList);
 
 	void BuildNoiseMap(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList);
 

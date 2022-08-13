@@ -245,16 +245,20 @@ void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene)
 
     RCamera* Camera = (RCamera*)IOGPUScene->Cameragroup[0];
 
-    //???强制转换？
+    //???强制转换？ 
+    //摄像机局部坐标系 
     XMMATRIX view = Camera->GetView();
+    //投影变换
     XMMATRIX proj = Camera->GetProj();
 
+    //投影变换矩阵 世界到屏幕空间
     XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 
+    //
     XMVECTOR matrixview = XMMatrixDeterminant(view);
     XMVECTOR matrixproj = XMMatrixDeterminant(proj);
     XMVECTOR matrixviewproj = XMMatrixDeterminant(viewProj);
-
+    //逆矩阵
     XMMATRIX invView = XMMatrixInverse(&matrixview, view);
     XMMATRIX invProj = XMMatrixInverse(&matrixproj, proj);
     XMMATRIX invViewProj = XMMatrixInverse(&matrixviewproj, viewProj);
@@ -264,6 +268,7 @@ void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene)
     ((RLight*)IOGPUScene->Lightgroup[0])->GetLightMatrix(IOGPUScene->GetSceneBounds(), lightNFWVPT);
     XMMATRIX shadowTransform = XMLoadFloat4x4(&lightNFWVPT.mShadowTransform);
 
+    //
     XMStoreFloat4x4(&Scenecontants.View, XMMatrixTranspose(view));
     XMStoreFloat4x4(&Scenecontants.InvView, XMMatrixTranspose(invView));
     XMStoreFloat4x4(&Scenecontants.Proj, XMMatrixTranspose(proj));

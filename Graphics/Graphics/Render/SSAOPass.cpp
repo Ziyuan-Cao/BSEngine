@@ -5,6 +5,7 @@ void SSAOPass::OnResize(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdLi
 {
     if (!Init)
     {
+        BuildSSAOCB(IDevice, ICmdList);
         BuildNoiseMap(IDevice,ICmdList);
     }
     VertexsAndIndexesInput();
@@ -98,6 +99,44 @@ void SSAOPass::CreateDescriptors(ID3D12Device* IDevice)
 
 }
 
+void SSAOPass::BuildSSAOCB(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList)
+{
+    SSAOConstant = new BGPU_Upload_Resource<SSAOcb>(IDevice,1,true);
+
+    DX_Information* DXInf = DX_Information::GetInstance();
+    
+    SSAOcb SSAOcbbuffer;
+
+    SSAOcbbuffer.screenSize = { (float)DXInf->GetWClientWidth(), (float)DXInf->GetWClientHeight() };
+    SSAOcbbuffer.noiseScale = { (float)DXInf->GetWClientWidth()/8,(float)DXInf->GetWClientHeight() / 8 }; // tiling
+    SSAOcbbuffer.radius = 1;
+    SSAOcbbuffer.power = 1.1;
+    SSAOcbbuffer.kernelSize = 16;
+
+    srand(time(0));
+
+    for (int i = 0; i < 16; i++)
+    {
+
+        int Rnd1 = rand();
+        int Rnd2 = rand();
+        int Rnd3 = rand();
+        SSAOcbbuffer.SSAOKernel[i].x = float(Rnd1 % (1000)) / 500 - 1;
+        SSAOcbbuffer.SSAOKernel[i].y = float(Rnd2 % (1000)) / 500 - 1;
+        SSAOcbbuffer.SSAOKernel[i].z = float(Rnd3 % (1000)) / 1000;
+
+        float scale = (float)i / 16.0f;
+        float scaleMul = MathHelper::Lerp(0.1f, 1.0f, scale * scale);
+
+        SSAOcbbuffer.SSAOKernel[i].x *= scaleMul;
+        SSAOcbbuffer.SSAOKernel[i].y *= scaleMul;
+        SSAOcbbuffer.SSAOKernel[i].z *= scaleMul;
+    }
+
+    SSAOConstant->CopyData(0, SSAOcbbuffer);
+
+}
+
 void SSAOPass::BuildNoiseMap(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList)
 {
     float noiseTextureFloats[192];
@@ -108,9 +147,8 @@ void SSAOPass::BuildNoiseMap(ID3D12Device* IDevice, ID3D12GraphicsCommandList* I
     {
         int Rnd1 = rand();
         int Rnd2 = rand();
-        int Rnd3 = rand();
-        float R0 = float(Rnd1 % (2)) - 1;
-        float R1 = float(Rnd1 % (2)) - 1;
+        float R0 = float(Rnd1 % (1000)) / 500 - 1;
+        float R1 = float(Rnd2 % (1000)) / 500 - 1;
 
         int index = i * 3;
         noiseTextureFloats[index] = R0;
@@ -250,16 +288,17 @@ void SSAOPass::BuildRootSignature(ID3D12Device* IDevice)
     
     range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 2);
 
-    CD3DX12_ROOT_PARAMETER rootParameters[4];
+    CD3DX12_ROOT_PARAMETER rootParameters[5];
     rootParameters[0].InitAsConstantBufferView(0);
-    rootParameters[1].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParameters[2].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);
-    rootParameters[3].InitAsDescriptorTable(1, &range[2], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[1].InitAsConstantBufferView(1);
+    rootParameters[2].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[3].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[4].InitAsDescriptorTable(1, &range[2], D3D12_SHADER_VISIBILITY_PIXEL);
 
     auto staticSamplers = DXInf->GetStaticSamplers();
 
     CD3DX12_ROOT_SIGNATURE_DESC descRootSignature;
-    descRootSignature.Init(4,
+    descRootSignature.Init(5,
         rootParameters,
         (UINT)staticSamplers.size(),
         staticSamplers.data(),
@@ -338,21 +377,26 @@ void SSAOPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
 
     ICmdList->SetPipelineState(PSOs["SSAO"]);
 
+    //PASSCB
     auto passCB = IRenderscene->GetSceneConstantsGPU();
     ICmdList->SetGraphicsRootConstantBufferView(0, passCB->Resource()->GetGPUVirtualAddress());
 
+    //SSAOCB
+    ICmdList->SetGraphicsRootConstantBufferView(1, SSAOConstant->Resource()->GetGPUVirtualAddress());
+
+
     //GBUFFER
-    ICmdList->SetGraphicsRootDescriptorTable(3, SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    ICmdList->SetGraphicsRootDescriptorTable(4, SRVHeap->GetGPUDescriptorHandleForHeapStart());
 
     //Depth
     CD3DX12_GPU_DESCRIPTOR_HANDLE depthDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
     depthDescriptor.Offset(DepthIndex, DXInf->CbvSrvUavDescriptorsize);
-    ICmdList->SetGraphicsRootDescriptorTable(1, depthDescriptor);
+    ICmdList->SetGraphicsRootDescriptorTable(2, depthDescriptor);
 
     //Depth
     CD3DX12_GPU_DESCRIPTOR_HANDLE noiseDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
     noiseDescriptor.Offset(NoiseIndex, DXInf->CbvSrvUavDescriptorsize);
-    ICmdList->SetGraphicsRootDescriptorTable(2, depthDescriptor);
+    ICmdList->SetGraphicsRootDescriptorTable(3, noiseDescriptor);
 
     ICmdList->ClearRenderTargetView(RTVHeap->GetCPUDescriptorHandleForHeapStart(), DXInf->Clearcolor, 0, nullptr);
 
