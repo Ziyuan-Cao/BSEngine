@@ -3,7 +3,10 @@
 
 DLL import & outport
 
-FBX reading
+multi-material
+FBX reading 
+
+animation
 
 deferred rendering
 
@@ -11,5 +14,5 @@ shadow map
 
 SSAO
 
-Light
+simple light
 
