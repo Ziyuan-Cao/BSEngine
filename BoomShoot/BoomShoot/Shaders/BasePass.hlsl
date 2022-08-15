@@ -4,6 +4,9 @@ StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
 
 Texture2D gShadowMap: register(t1, space1);
 
+Texture2D gTextureMaps[20] : register(t2);
+
+
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
 SamplerState gsamLinearWrap       : register(s2);
@@ -164,8 +167,8 @@ ps_output PS(VertexOut pin)
 	uint normalMapIndex = matData.NormalMapIndex;
 
 	//Basecolor
-	//float4 BaseColor = gTextureMaps[textureMapIndex].Sample(gsamPointWrap, pin.TexC);//baseColor
-	float4 BaseColor = float4(matData.LightColor.r, matData.LightColor.g, matData.LightColor.b, 1);
+	float4 BaseColor = gTextureMaps[textureMapIndex].Sample(gsamPointWrap, pin.TexC);//baseColor
+	//float4 BaseColor = float4(matData.LightColor.r, matData.LightColor.g, matData.LightColor.b, 1);
 
 	//Normal
 	pin.NormalW = normalize(pin.NormalW);

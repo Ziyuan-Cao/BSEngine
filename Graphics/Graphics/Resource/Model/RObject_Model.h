@@ -11,6 +11,8 @@ class RObject_Model : public AObject_Model
 {
 public:
 
+	bool hasTexture = false;
+
 	RObject_Model() 
 	{
 		
@@ -72,14 +74,10 @@ public:
 		ID3D12Resource* Vertexbufferuploader = nullptr;
 		ID3D12Resource* Indexbufferuploader = nullptr;
 
-
 		UINT Vertexbytestride = 0;
 		UINT Vertexbufferbytesize = 0;
 		DXGI_FORMAT Indexformat = DXGI_FORMAT_R16_UINT;
 		UINT Indexbufferbytesize = 0;
-
-		//ÌùÍ¼¶Ñ
-		//ID3D12DescriptorHeap* TextureSRV;
 
 	public:
 		//×¢Òâ¹«¹²ÐÔ
@@ -125,6 +123,11 @@ public:
 		return ObjectconstantsGPU;
 	}
 
+	ID3D12DescriptorHeap* GetTextureDescHeap()
+	{
+		return TextureSRVHeap;
+	}
+
 	void SetPrimitiveType(int IPolygonType)
 	{
 		switch (IPolygonType)
@@ -159,6 +162,9 @@ protected:
 	ID3DBlob* VertexbufferCPU = nullptr;
 	ID3D12Resource* VertexbufferGPU = nullptr;
 	ID3D12Resource* Vertexbufferuploader = nullptr;
+	//ÌùÍ¼¶Ñ
+	ID3D12DescriptorHeap* TextureSRVHeap = nullptr;
+
 	UINT Vertexbytestride = 0;
 	UINT Vertexbufferbytesize = 0;
 

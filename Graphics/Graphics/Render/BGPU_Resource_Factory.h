@@ -1,6 +1,7 @@
 #pragma once 
 #include "Resource/RRender_Scene.h"
 #include "Render/Auxiliary/BGPU_Upload_Resource.h"
+
 //为资源管理分配GPU内存资源
 //更新资源
 //释放资源
@@ -34,6 +35,17 @@ public:
         ID3D12Device* IDevice,
         RRender_Scene * IOGPUScene
         );
+
+    void AssignTexture(ID3D12Device* IDevice,
+        ID3D12GraphicsCommandList* ICmdList,
+        RTexture* IOTexture,
+        ID3D12DescriptorHeap* IOsrvHeapHandle,
+        int IIndex);
+
+    void AssignTextures(
+        ID3D12Device* IDevice,
+        ID3D12GraphicsCommandList* ICmdList,
+        RObject_Model* IObject_Model);
 
     void UpdateGPUScene(RRender_Scene* IOGPUScene);
     

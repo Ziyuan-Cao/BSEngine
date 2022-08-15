@@ -22,6 +22,10 @@ const static UINT SwapChainBufferCount = 2;
 const static UINT FrameresourceCount = 2;
 const static UINT MaxLights = 16;
 
+const static UINT MaxTextures = 20;
+
+const static std::wstring DefualtTextureFilePath = L"gray.dds";
+
 inline std::wstring AnsiToWString(const std::string& str)
 {
 	WCHAR buffer[512];

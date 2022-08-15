@@ -1,4 +1,6 @@
-#include"Render/BGPU_Resource_Factory.h"
+#include "Render/BGPU_Resource_Factory.h"
+#include "Auxiliary/DDSTextureLoader.h"
+#include "DirectX/DX_Information.h"
 
 void BGPU_Resource_Factory::AssignGPUObject(
     ID3D12Device* IDevice,
@@ -15,9 +17,13 @@ void BGPU_Resource_Factory::AssignGPUObject(
     UINT Matnumber = IObject_Model->CPUMeshdata.Materialgroup.size();
     IObject_Model->MaterialconstantsGPU = new BGPU_Upload_Resource<AMaterial::MaterialData>(IDevice, Matnumber, false);
     UpdateGPUMaterials(IObject_Model);
+
+    AssignTextures(IDevice, ICmdList, IObject_Model);
+
     //ObjCB
     IObject_Model->ObjectconstantsGPU = new BGPU_Upload_Resource<RObject_Model::ObjectConstant>(IDevice, Matnumber, true);
     UpdateGPUObjectCB(IObject_Model);
+    
     //???
     IObject_Model->Geometriesnumber = Matnumber;
 
@@ -146,6 +152,110 @@ void BGPU_Resource_Factory::AssignGPUScene(
 
 }
 
+void BGPU_Resource_Factory::AssignTextures(
+    ID3D12Device* IDevice,
+    ID3D12GraphicsCommandList* ICmdList,
+    RObject_Model* IObject_Model)
+{
+
+    std::vector<RTexture*> texturebuffer;
+
+    int Matnumber = IObject_Model->CPUMeshdata.Materialgroup.size();
+    for (int i = 0; i < Matnumber; i++)
+    {
+        auto & textures = IObject_Model->CPUMeshdata.Materialgroup[i]->TextureGroup;
+
+        for (int j = 0; j < textures.size(); j++)
+        {
+            if (textures[j]->GPUInit)
+            {
+                continue;
+            }
+            textures[j]->GPUInit = true;
+            ThrowIfFailed(
+                DirectX::CreateDDSTextureFromFile12(
+                    IDevice, 
+                    ICmdList,
+                    textures[j]->Filepath.c_str(),
+                    &textures[j]->TextureGPU,
+                    &textures[j]->Textureuploader));
+
+            ZeroMemory(&textures[j]->TextureSRV, sizeof(textures[j]->TextureSRV));
+            textures[j]->TextureSRV.Texture2D.MipLevels = 1;
+            textures[j]->TextureSRV.Texture2D.MostDetailedMip = 0;
+            textures[j]->TextureSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // srv FORMAT
+            textures[j]->TextureSRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            textures[j]->TextureSRV.Format = textures[j]->TextureGPU->GetDesc().Format; // 精度有关
+
+            texturebuffer.push_back(textures[j]);
+
+        }
+    }
+
+    if (!texturebuffer.empty())
+    {
+        IObject_Model->hasTexture = true;
+
+        D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+        srvHeapDesc.NumDescriptors = texturebuffer.size();
+        srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        ThrowIfFailed(IDevice->CreateDescriptorHeap(
+            &srvHeapDesc, IID_PPV_ARGS(&IObject_Model->TextureSRVHeap)));
+
+        DX_Information* DXInf = DX_Information::GetInstance();
+        
+                //SRV 
+                CD3DX12_CPU_DESCRIPTOR_HANDLE srvHeapHandle(IObject_Model->TextureSRVHeap->GetCPUDescriptorHandleForHeapStart());
+        
+                for (UINT i = 0; i < texturebuffer.size(); i++)
+                {
+                    IDevice->CreateShaderResourceView(texturebuffer[i]->TextureGPU,
+                        &texturebuffer[i]->TextureSRV,
+                        srvHeapHandle);
+                    srvHeapHandle.Offset(1, DXInf->CbvSrvUavDescriptorsize);
+                }
+    }
+
+
+}
+
+
+void BGPU_Resource_Factory::AssignTexture(ID3D12Device* IDevice,
+    ID3D12GraphicsCommandList* ICmdList,
+    RTexture* IOTexture,
+    ID3D12DescriptorHeap* IOsrvHeapHandle,
+    int IIndex)
+{
+
+    ThrowIfFailed(
+        DirectX::CreateDDSTextureFromFile12(
+            IDevice,
+            ICmdList,
+            IOTexture->Filepath.c_str(),
+            &IOTexture->TextureGPU,
+            &IOTexture->Textureuploader));
+
+    ZeroMemory(&IOTexture->TextureSRV, sizeof(IOTexture->TextureSRV));
+    IOTexture->TextureSRV.Texture2D.MipLevels = 1;
+    IOTexture->TextureSRV.Texture2D.MostDetailedMip = 0;
+    IOTexture->TextureSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // srv FORMAT
+    IOTexture->TextureSRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    IOTexture->TextureSRV.Format = IOTexture->TextureGPU->GetDesc().Format; // 精度有关
+
+    DX_Information* DXInf = DX_Information::GetInstance();
+
+    //SRV 
+    CD3DX12_CPU_DESCRIPTOR_HANDLE srvHeapHandle(IOsrvHeapHandle->GetCPUDescriptorHandleForHeapStart());
+    srvHeapHandle.Offset(IIndex, DXInf->CbvSrvUavDescriptorsize);
+
+    IDevice->CreateShaderResourceView(IOTexture->TextureGPU,
+        &IOTexture->TextureSRV,
+        srvHeapHandle);
+
+}
+
+
 void BGPU_Resource_Factory::UpdateGPUScene(RRender_Scene* IOGPUScene)
 {
     UpdateGPUSceneCB(IOGPUScene);
@@ -166,6 +276,8 @@ void BGPU_Resource_Factory::UpdateGPUScene(RRender_Scene* IOGPUScene)
     }
 
 }
+
+
 
 ID3D12Resource* BGPU_Resource_Factory::CreateDefaultBuffer(
     ID3D12Device* IDevice,
@@ -292,6 +404,7 @@ void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene)
     IOGPUScene->SceneconstantsGPU->CopyData(0, Scenecontants);
 
 }
+
 
 
 void BGPU_Resource_Factory::UpdateGPUMaterials(RObject_Model* IObject_Model)

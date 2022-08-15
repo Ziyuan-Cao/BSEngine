@@ -16,6 +16,14 @@
 
 bool GetAnimationData(RSkeleton_Model* IOSkeletonmodel, Fbx* IFbx);
 
+/***
+************************************************************
+*
+* DLL Creating
+* 
+************************************************************
+*/
+
 bool AResource_Factory::LoadData()
 {
 	return true;
@@ -51,6 +59,14 @@ AMaterial* AResource_Factory::CreateMaterial()
 	return new RMaterial();
 }
 
+/***
+************************************************************
+*
+* Auxiliary Function
+* 
+************************************************************
+*/
+
 std::wstring StringToWString(const std::string& str) {
     int num = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
     wchar_t* wide = new wchar_t[num];
@@ -72,6 +88,14 @@ std::string WstringToString(std::wstring wstr)
     return result;
 }
 
+/***
+************************************************************
+*
+* FBX Reading 
+* Animation Reading
+************************************************************ 
+*/
+
 std::string GetFbxFile(std::wstring DirPath)
 {
     HANDLE hFind;
@@ -88,11 +112,11 @@ std::string GetFbxFile(std::wstring DirPath)
     return res;
 }
 
-bool AResource_Factory::LoadFbx(AObject_Model* IOObjectmodel, std::wstring IFilename)
+bool AResource_Factory::LoadFbx(AObject_Model* IOObjectmodel, std::wstring IDictionary)
 {
 
     Fbx myFbx;
-    std::string Fbxpath = GetFbxFile(IFilename);
+    std::string Fbxpath = GetFbxFile(IDictionary);
     if (Fbxpath.empty()) return false;
     myFbx.ReadFbx(Fbxpath.c_str(), IOObjectmodel->hasAnimation);
 
@@ -446,7 +470,6 @@ void ConvertFBXMatrix(FbxAMatrix& IFBXMatrix, DirectX::XMMATRIX& IODIRMatrix)
         IFBXMatrix.Get(3, 0), IFBXMatrix.Get(3, 1), IFBXMatrix.Get(3, 2), IFBXMatrix.Get(3, 3));
 
 }
-
 
 // Get the geometry offset to a node. It is never inherited by the children.
 FbxAMatrix GetGeometry(FbxNode* pNode)
@@ -816,6 +839,87 @@ FbxAMatrix GetGlobalPosition(
 }
 
 
+/***
+************************************************************
+*
+* Load Texture
+*
+************************************************************
+*/
+
+bool AResource_Factory::LoadTexture(ATexture*& IOTexture, std::wstring IDictionary)
+{
+    HANDLE hFind;
+    WIN32_FIND_DATA data;
+
+    hFind = FindFirstFile(IDictionary.c_str(), &data);
+    if (hFind != INVALID_HANDLE_VALUE) 
+    {
+            IOTexture = CreateTexture();
+
+            // add the path and file name together
+            std::wstring tex_name(data.cFileName);
+            IOTexture->Name = tex_name;
+            //printf("1:%s\n", filename.back());
+
+            IOTexture->Filepath = IDictionary;
+            //printf("2:%ws\n", ofiles.back());
+
+        FindClose(hFind);
+        return true;
+    }
+    return false;
+}
+
+
+bool AResource_Factory::LoadTextures(std::vector<ATexture*>& IOTextures, std::wstring IDictionary)
+{
+    HANDLE hFind;
+    WIN32_FIND_DATA data;
+
+    IOTextures.clear();
+
+    std::wstring SearchName = IDictionary + L"*.dds";
+    int i = 0;
+    hFind = FindFirstFile(SearchName.c_str(), &data);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+
+            ATexture* texture = CreateTexture();
+
+            // add the path and file name together
+            std::wstring tex_name(data.cFileName);
+            texture->Name = tex_name;
+            //printf("1:%s\n", filename.back());
+
+            texture->Filepath = IDictionary + data.cFileName;
+            //printf("2:%ws\n", ofiles.back());
+
+            IOTextures.push_back(texture);
+
+        } while (FindNextFile(hFind, &data));
+
+        FindClose(hFind);
+    }
+    return true;
+}
+
+
+/***
+************************************************************
+*
+* Resource_Factory Function
+* 
+************************************************************
+*/
+
+bool AResource_Factory::LoadObject(AObject_Model* IOObjectmodel, std::vector<ATexture*>& IOTextures, std::wstring IDictionary)
+{
+    LoadFbx(IOObjectmodel, IDictionary);
+    LoadTextures(IOTextures, IDictionary + L"Texture\\");
+    return true;
+}
+
 
 bool AResource_Factory::AddMaterial(AObject_Model* IOObjectmodel, std::vector<AMaterial*>& IMaterial)
 {
@@ -833,5 +937,21 @@ bool AResource_Factory::AddMaterial(AObject_Model* IOObjectmodel, std::vector<AM
     {
         Matgroup[i] = (RMaterial*)IMaterial[i];
     }
+    return true;
+}
+
+bool AResource_Factory::RelateTexturetoMaterial(AMaterial* IMaterial, std::vector<ATexture*>& ITextures)
+{
+    RMaterial* material = (RMaterial*)IMaterial;
+
+    int texturecount = ITextures.size();
+
+    material->TextureGroup.assign(texturecount,nullptr);
+    for(int i = 0; i < texturecount;i++)
+    {
+        material->TextureGroup[i] = (RTexture*)ITextures[i];
+
+    }
+
     return true;
 }

@@ -50,11 +50,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		//AObjectmodel->Scale[2] = 0.04f;
 		//Ars->Skeletongroup.push_back(AObjectmodel);
 	}
+
 	{
 		AObject_Model* AObjectmodel;
 		AResource_Factory Resourcefactory;
 		AObjectmodel = Resourcefactory.CreateStaticModel();
-		Resourcefactory.LoadFbx(AObjectmodel, L"FBXResouce\\FBXr\\");
+		std::vector<ATexture*> Texturegroup = {};
+		Resourcefactory.LoadObject(AObjectmodel, Texturegroup, L"FBXResouce\\FBXr\\");
+
 		//Material
 		int Matnums = AObjectmodel->Materialnums;
 		std::vector<AMaterial*> Materialgroup = {};
@@ -63,6 +66,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		{
 			Materialgroup[i] = Resourcefactory.CreateMaterial();
 			Materialgroup[i]->SetLightColor({ 0.09f *i,0.4f, 0.4f });
+			std::vector<ATexture*> Texturegroupbuffer;
+			Texturegroupbuffer.push_back(Texturegroup[i]);
+			Resourcefactory.RelateTexturetoMaterial(Materialgroup[i], Texturegroupbuffer);
 		}
 		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
 		//ObjCB

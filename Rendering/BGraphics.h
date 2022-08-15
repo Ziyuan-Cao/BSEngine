@@ -29,6 +29,8 @@ extern "C"
 	class AResource
 	{
 	public:
+		std::wstring ID{};
+		std::wstring Name{};
 		std::wstring Filepath{};
 	};
 
@@ -96,10 +98,17 @@ extern "C"
 	};
 
 
+
 	class ATexture : public AResource
 	{
-	public:
 
+	public:
+		enum TEXTURE_TYPE
+		{
+			COLOR_TEXTURE, 
+			NORMAL_TEXTURE,
+			SPECULAR_TEXTURE // Useless
+		};
 	};
 
 	class AObject_Model : public AResource
@@ -137,7 +146,7 @@ extern "C"
 		//A真正读取为R类型
 		bool LoadData();
 
-		bool LoadFbx(AObject_Model* IOObjectmodel, std::wstring IFilename);
+		bool LoadFbx(AObject_Model* IOObjectmodel, std::wstring IDictionary);
 
 		AObject_Model* CreateSkeletonModel();
 
@@ -153,6 +162,14 @@ extern "C"
 
 		bool AddMaterial(AObject_Model* IOObjectmodel, std::vector<AMaterial*>& IMaterial);
 	
+		bool RelateTexturetoMaterial(AMaterial* IMaterial, std::vector<ATexture*>& ITextures);
+
+		bool LoadTexture(ATexture*& IOTexture, std::wstring IDictionary);
+
+		bool LoadTextures(std::vector<ATexture*>& IOTextures, std::wstring IDictionary);
+
+		bool LoadObject(AObject_Model* IOObjectmodel, std::vector<ATexture*>& IOTextures, std::wstring IDictionary);
+
 	private:
 		bool LoadHierarchy();
 	};
