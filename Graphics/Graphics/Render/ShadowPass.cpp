@@ -270,13 +270,13 @@ void ShadowPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList
     ICmdList->RSSetScissorRects(1, DXInf->GetScissorRect());
 
 
-    CD3DX12_RESOURCE_BARRIER Recourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    CD3DX12_RESOURCE_BARRIER Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
         DXInf->Resourceheap->GetResource("ShadowBuffer"),
         D3D12_RESOURCE_STATE_COMMON,
         D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
     ICmdList->ResourceBarrier(1,
-        &Recourcebarrier);
+        &Resourcebarrier);
 
     ICmdList->ClearDepthStencilView(DSVHeap->GetCPUDescriptorHandleForHeapStart(),
         D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
@@ -300,13 +300,13 @@ void ShadowPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList
         DrawRenderItem(ICmdList, Renderitems[i]);
     }
 
-    Recourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
         DXInf->Resourceheap->GetResource("ShadowBuffer"),
         D3D12_RESOURCE_STATE_DEPTH_WRITE,
         D3D12_RESOURCE_STATE_PRESENT);
 
     ICmdList->ResourceBarrier(1,
-        &Recourcebarrier);
+        &Resourcebarrier);
 
 }
 

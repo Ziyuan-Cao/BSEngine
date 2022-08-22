@@ -107,8 +107,10 @@ extern "C"
 		{
 			COLOR_TEXTURE, 
 			NORMAL_TEXTURE,
+			WATERFLOW_TEXTURE,
+			WATERVIE_TEXTURE,
 			SPECULAR_TEXTURE // Useless
-		};
+		} Type = COLOR_TEXTURE;
 	};
 
 	class AObject_Model : public AResource
@@ -118,6 +120,8 @@ extern "C"
 
 		bool isGPUInit = false;
 		//Debug
+		bool isTransparent = false;
+		bool isWater = false;
 		bool isStatic = true;
 		bool hasAnimation = false;
 		bool caseShadow = true;

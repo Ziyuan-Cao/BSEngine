@@ -70,7 +70,7 @@ void BasePass::BuildHeaps(ID3D12GraphicsCommandList* ICmdList)
             nullptr,
             0,
             D3D12_HEAP_TYPE_DEFAULT,
-            D3D12_RESOURCE_STATE_RENDER_TARGET,
+            D3D12_RESOURCE_STATE_PRESENT,
             &clearVal);
 
         DXInf->Resourceheap->CreateRTVDesc("GBuffer" + std::to_string(i), descRTV);
@@ -596,7 +596,7 @@ void BasePass::LoadDefualtTexture(ID3D12Device* IDevice, ID3D12GraphicsCommandLi
 
 void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, RRender_Scene* IRenderscene)
 {
-///Init
+    ///Init
 
     DX_Information* DXInf = DX_Information::GetInstance();
 
@@ -605,19 +605,28 @@ void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
         RTVHeap->GetCPUDescriptorHandleForHeapStart(),
         0,
         DXInf->RtvDescriptorsize);
+
     for (int i = 0; i < GBufferRTCount; i++)
     {
+        CD3DX12_RESOURCE_BARRIER Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            DXInf->Resourceheap->GetResource("GBuffer" + std::to_string(i)),
+            D3D12_RESOURCE_STATE_PRESENT,
+            D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+        ICmdList->ResourceBarrier(1,
+            &Resourcebarrier);
+
         ICmdList->ClearRenderTargetView(Gbuffer_Handle_c, DXInf->Clearcolor, 0, nullptr);
         Gbuffer_Handle_c.Offset(1, DXInf->RtvDescriptorsize);
     }
 
-    CD3DX12_RESOURCE_BARRIER Recourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    CD3DX12_RESOURCE_BARRIER Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
         DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
         D3D12_RESOURCE_STATE_GENERIC_READ,
         D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
     ICmdList->ResourceBarrier(1,
-        &Recourcebarrier);
+        &Resourcebarrier);
 
     ICmdList->ClearDepthStencilView(DSVHeap->GetCPUDescriptorHandleForHeapStart(),
         D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
@@ -659,13 +668,17 @@ void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
         true,
         &CPUDeschandle);
 
-/////////////////////////////////////////////////////////////////////////////
-///draw///////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-    //每次绘制都要重建PSO 以载入贴图
+    /////////////////////////////////////////////////////////////////////////////
+    ///draw///////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+        //每次绘制都要用模型的贴图堆
     const std::vector<RRender_Scene::RenderItem>& Renderitems = IRenderscene->GetRenderItems();
     for (int i = 0; i < Renderitems.size(); i++)
     {
+        if (Renderitems[i].Objectmodel->isTransparent || Renderitems[i].Objectmodel->isWater)
+        {
+            continue;
+        }
         if (Renderitems[i].Objectmodel->hasTexture)
         {
             auto TexSRVHeap = Renderitems[i].Objectmodel->GetTextureDescHeap();
@@ -696,13 +709,24 @@ void BasePass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList, 
 ///finish//////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
-    Recourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
         DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
         D3D12_RESOURCE_STATE_DEPTH_WRITE,
         D3D12_RESOURCE_STATE_GENERIC_READ);
 
     ICmdList->ResourceBarrier(1,
-        &Recourcebarrier);
+        &Resourcebarrier);
+
+    for (int i = 0; i < GBufferRTCount; i++)
+    {
+        CD3DX12_RESOURCE_BARRIER Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            DXInf->Resourceheap->GetResource("GBuffer" + std::to_string(i)),
+            D3D12_RESOURCE_STATE_RENDER_TARGET,
+            D3D12_RESOURCE_STATE_PRESENT);
+
+        ICmdList->ResourceBarrier(1,
+            &Resourcebarrier);
+    }
 
 }
    

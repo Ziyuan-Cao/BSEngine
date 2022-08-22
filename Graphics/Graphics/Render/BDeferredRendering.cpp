@@ -10,12 +10,14 @@ BDeferredRendering::BDeferredRendering(
 	Shadowpass = new ShadowPass(DXInf->GetWClientWidth(), DXInf->GetWClientHeight());
 	Basepass = new BasePass();
 	Lightpass = new LightPass();
+	Transparentpass = new TransparentPass();
 	SSAOpass = new SSAOPass();
 	Mixpass = new MixPass();
 
 	Shadowpass->OnResize(IDevice, ICmdList);
 	Basepass->OnResize(IDevice, ICmdList);
 	Lightpass->OnResize(IDevice, ICmdList);
+	Transparentpass->OnResize(IDevice, ICmdList);
 	SSAOpass->OnResize(IDevice, ICmdList);
 	Mixpass->OnResize(IDevice, ICmdList);
 
@@ -27,6 +29,7 @@ void BDeferredRendering::Initialize(ID3D12Device* IDevice,
 	Shadowpass->Initialize(IDevice, ICmdList);
 	Basepass->Initialize(IDevice, ICmdList);
 	Lightpass->Initialize(IDevice, ICmdList);
+	Transparentpass->Initialize(IDevice, ICmdList);
 	SSAOpass->Initialize(IDevice, ICmdList);
 	Mixpass->Initialize(IDevice, ICmdList);
 }
@@ -49,13 +52,12 @@ void BDeferredRendering::Render(
 	
 	Lightpass->Draw(IDevice, ICmdList, IRenderscene);
 
+	Transparentpass->Draw(IDevice, ICmdList, IRenderscene);
+
 	SSAOpass->Draw(IDevice, ICmdList, IRenderscene);
 
 	//reflection
 
-	//SSAO
-
-	//
 
 	Mixpass->Draw(IDevice, ICmdList, IRenderscene, ORendertarget, ORendertargetView);
 }

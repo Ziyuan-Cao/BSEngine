@@ -290,10 +290,6 @@ void LightPass::Draw(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList,
 
     ICmdList->ResourceBarrier(1, &Resourcebarrier);
 
-    //Resourcebarrier = CD3DX12_RESOURCE_BARRIER::Transition(DXInf->Resourceheap->GetResource("DepthStencilBuffer"),
-    //    D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
-    //ICmdList->ResourceBarrier(1, &Resourcebarrier);
-
     ID3D12DescriptorHeap* descriptorHeaps[] = { SRVHeap };
 
     ICmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);

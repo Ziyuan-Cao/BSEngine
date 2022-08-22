@@ -28,6 +28,9 @@
     <Filter Include="Resource\Auxiliary">
       <UniqueIdentifier>{8bbe6741-cdc4-4a97-b350-70dbff42b0cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\Shader">
+      <UniqueIdentifier>{03e03321-e8f3-4abf-a97b-c36bcd0341da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Logic\framework.h">
@@ -225,5 +228,46 @@
     <ClCompile Include="Render\TransparentPass.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\BasePass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\Common.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\LightingUtil.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\LightPass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\MixPass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\ProfileCS.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\ProfilePass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\ShadowPass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\Shadows.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\Sky.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\SSAOPass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\TransparentPass.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\BoomShoot\BoomShoot\Shaders\MathFunction.hlsl">
+      <Filter>Render\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -114,6 +114,45 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		Ars->Skeletongroup.push_back(AObjectmodel);
 	}
 
+	{
+		AObject_Model* AObjectmodel;
+		AResource_Factory Resourcefactory;
+		AObjectmodel = Resourcefactory.CreateStaticModel();
+		AObjectmodel->caseShadow = false;
+		std::vector<ATexture*> Texturegroup = {};
+		Resourcefactory.LoadObject(AObjectmodel, Texturegroup, L"FBXResouce\\FBXPlaneWater\\");
+		Texturegroup[0]->Type = ATexture::TEXTURE_TYPE::WATERFLOW_TEXTURE;
+		Texturegroup[1]->Type = ATexture::TEXTURE_TYPE::WATERVIE_TEXTURE;
+
+		//Material
+		int Matnums = AObjectmodel->Materialnums;
+		std::vector<AMaterial*> Materialgroup = {};
+		Materialgroup.assign(Matnums, nullptr);
+		for (int i = 0; i < Matnums; i++)
+		{
+			Materialgroup[i] = Resourcefactory.CreateMaterial();
+			Materialgroup[i]->SetLightColor({ 0.4 ,0.4, 0.4 });
+			std::vector<ATexture*> Texturegroupbuffer;
+			Texturegroupbuffer.push_back(Texturegroup[0]);
+			Texturegroupbuffer.push_back(Texturegroup[1]);
+			Resourcefactory.RelateTexturetoMaterial(Materialgroup[i], Texturegroupbuffer);
+
+		}
+		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
+		//ObjCB
+		AObjectmodel->Transform[0] = 0.001f;
+		AObjectmodel->Transform[1] = 0.001f;
+		AObjectmodel->Transform[2] = 0.0f;
+		AObjectmodel->Rotation[0] = 0.0001f;
+		AObjectmodel->Rotation[1] = 0.0f;
+		AObjectmodel->Rotation[2] = 0.0f;
+		AObjectmodel->Scale[0] = 100.0f;
+		AObjectmodel->Scale[1] = 100.0f;
+		AObjectmodel->Scale[2] = 100.0f;
+		AObjectmodel->isWater = true;
+		Ars->Skeletongroup.push_back(AObjectmodel);
+	}
+
 	//Lights
 	{
 		ALight* light;

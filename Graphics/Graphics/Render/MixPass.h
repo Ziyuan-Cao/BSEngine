@@ -30,6 +30,7 @@ private:
 	UINT DepthIndex = 0;
 	UINT ProfileIndex = 0;
 	UINT LightIndex = 0;
+	UINT TransparentIndex = 0;
 
 	std::unordered_map<std::string, ID3DBlob*> Shaders;
 	std::unordered_map<std::string, ID3D12PipelineState*> PSOs;

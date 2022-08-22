@@ -1,4 +1,5 @@
 #include "SSAOPass.h"
+#include "DirectX/DX_Information.h"
 #include <ctime>
 
 void SSAOPass::OnResize(ID3D12Device* IDevice, ID3D12GraphicsCommandList* ICmdList)
@@ -282,15 +283,15 @@ void SSAOPass::BuildRootSignature(ID3D12Device* IDevice)
     DX_Information* DXInf = DX_Information::GetInstance();
     
     CD3DX12_DESCRIPTOR_RANGE range[3];
-    range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+    range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);//SceneDepthMap: register(t0);
 
-    range[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+    range[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);//NoiseMap: register(t1);
     
-    range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 2);
+    range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 2);//GBuffer[5] : register(t2);
 
     CD3DX12_ROOT_PARAMETER rootParameters[5];
-    rootParameters[0].InitAsConstantBufferView(0);
-    rootParameters[1].InitAsConstantBufferView(1);
+    rootParameters[0].InitAsConstantBufferView(0); //cbPass : register(b0)
+    rootParameters[1].InitAsConstantBufferView(1); //SSAOBuffer : register(b1)
     rootParameters[2].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);
     rootParameters[3].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);
     rootParameters[4].InitAsDescriptorTable(1, &range[2], D3D12_SHADER_VISIBILITY_PIXEL);

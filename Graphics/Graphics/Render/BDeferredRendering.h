@@ -4,6 +4,7 @@
 #include "LightPass.h"
 #include "MixPass.h"
 #include "ShadowPass.h"
+#include "TransparentPass.h"
 #include "SSAOPass.h"
 //#include "Auxiliary/BFrame_Resource.h"
 
@@ -27,7 +28,7 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE ORendertargetView);
 
 protected:
-
+	TransparentPass* Transparentpass;
 	ShadowPass* Shadowpass;
 	BasePass* Basepass;
 	LightPass* Lightpass;

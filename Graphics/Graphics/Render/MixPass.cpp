@@ -40,10 +40,15 @@ void MixPass::Draw(ID3D12Device* IDevice,
     ssaoDescriptor.Offset(SSAOIndex, DXInf->CbvSrvUavDescriptorsize);
     ICmdList->SetGraphicsRootDescriptorTable(3, ssaoDescriptor);
 
+    //transparent
+    CD3DX12_GPU_DESCRIPTOR_HANDLE transparentDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
+    transparentDescriptor.Offset(TransparentIndex, DXInf->CbvSrvUavDescriptorsize);
+    ICmdList->SetGraphicsRootDescriptorTable(4, transparentDescriptor);
+
     //GBuffer
     CD3DX12_GPU_DESCRIPTOR_HANDLE GBDescriptor(SRVHeap->GetGPUDescriptorHandleForHeapStart());
     GBDescriptor.Offset(GBufferIndex, DXInf->CbvSrvUavDescriptorsize);
-    ICmdList->SetGraphicsRootDescriptorTable(4, GBDescriptor);
+    ICmdList->SetGraphicsRootDescriptorTable(5, GBDescriptor);
 
     ICmdList->ClearRenderTargetView(ORendertargetView, Colors::LightSteelBlue, 0, nullptr);
     D3D12_CPU_DESCRIPTOR_HANDLE Currentbackbufferview = ORendertargetView;
@@ -88,8 +93,8 @@ void MixPass::VertexsAndIndexesInput()
 void MixPass::BuildDescriptorHeaps(ID3D12Device* IDevice)
 {
     //create SRV DescriptorHeap
-    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {}; //Gbuffer + DepthSentil + light¡¡+ SSAO
-    srvHeapDesc.NumDescriptors = GBufferRTCount + 1 + 1 + 1;
+    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {}; //Gbuffer + DepthSentil + light¡¡+ SSAO + transparent
+    srvHeapDesc.NumDescriptors = GBufferRTCount + 1 + 1 + 1 + 1;
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(IDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&SRVHeap)));
@@ -104,7 +109,8 @@ void MixPass::CreateDescriptors(ID3D12Device* IDevice)
     LightIndex = 0;
     DepthIndex = LightIndex + 1;
     SSAOIndex = DepthIndex + 1;
-    GBufferIndex = SSAOIndex + 1;
+    TransparentIndex = SSAOIndex + 1;
+    GBufferIndex = TransparentIndex + 1;
 
     IDevice->CreateShaderResourceView(
         DXInf->Resourceheap->GetResource("LightMap"),
@@ -123,6 +129,13 @@ void MixPass::CreateDescriptors(ID3D12Device* IDevice)
         DXInf->Resourceheap->GetSRVDesc("SSAOMap"),
         hDescriptor);
     hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
+
+    IDevice->CreateShaderResourceView(
+        DXInf->Resourceheap->GetResource("TransparentMap"),
+        DXInf->Resourceheap->GetSRVDesc("TransparentMap"),
+        hDescriptor);
+    hDescriptor.Offset(1, DXInf->CbvSrvUavDescriptorsize);
+
 
     for (int i = 0; i < GBufferRTCount; i++) {
         IDevice->CreateShaderResourceView(
@@ -144,12 +157,13 @@ void MixPass::BuildRootSignature(ID3D12Device* IDevice)
 {
     DX_Information* DXInf = DX_Information::GetInstance();
 
-    CD3DX12_DESCRIPTOR_RANGE range[4];
+    CD3DX12_DESCRIPTOR_RANGE range[5];
     range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);//LightMap
     range[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);//SceneDepthMap
     range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2);//ssao
-    range[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 3);//GBuffer
-    CD3DX12_ROOT_PARAMETER rootParameters[5];
+    range[3].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3);//transparent
+    range[4].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBufferRTCount, 4);//GBuffer
+    CD3DX12_ROOT_PARAMETER rootParameters[6];
     rootParameters[0].InitAsConstantBufferView(0);//cbPass : register(b0)
 
     rootParameters[1].InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_PIXEL);//LightMap
@@ -157,13 +171,15 @@ void MixPass::BuildRootSignature(ID3D12Device* IDevice)
     rootParameters[2].InitAsDescriptorTable(1, &range[1], D3D12_SHADER_VISIBILITY_PIXEL);//SceneDepthMap
 
     rootParameters[3].InitAsDescriptorTable(1, &range[2], D3D12_SHADER_VISIBILITY_PIXEL);//ssao
+    
+    rootParameters[4].InitAsDescriptorTable(1, &range[3], D3D12_SHADER_VISIBILITY_PIXEL);//transparent
 
-    rootParameters[4].InitAsDescriptorTable(1, &range[3], D3D12_SHADER_VISIBILITY_PIXEL);//GBuffer
+    rootParameters[5].InitAsDescriptorTable(1, &range[4], D3D12_SHADER_VISIBILITY_PIXEL);//GBuffer
 
     auto staticSamplers = DXInf->GetStaticSamplers();
 
     CD3DX12_ROOT_SIGNATURE_DESC descRootSignature;
-    descRootSignature.Init(5,
+    descRootSignature.Init(6,
         rootParameters,
         (UINT)staticSamplers.size(),
         staticSamplers.data(),

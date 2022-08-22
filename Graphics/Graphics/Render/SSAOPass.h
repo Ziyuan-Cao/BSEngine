@@ -1,6 +1,5 @@
 #pragma once
 #include "Pass.h"
-#include "DirectX/DX_Information.h"
 #include "Resource/RRender_Scene.h"
 #include<string>
 #include<unordered_map>

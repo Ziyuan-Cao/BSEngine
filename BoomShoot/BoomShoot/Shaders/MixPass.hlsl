@@ -3,7 +3,8 @@
 Texture2D LightMap : register(t0);
 Texture2D SceneDepthMap: register(t1);
 Texture2D SSAOMap: register(t2);
-Texture2D GBuffer[5] : register(t3);
+Texture2D TransparentMap: register(t3);
+Texture2D GBuffer[5] : register(t4);
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
@@ -57,6 +58,7 @@ vs_out  VS(vs_in vIn)
 float4 PS(vs_out pIn) : SV_TARGET
 {
     float4 Lightcolor = LightMap.Sample(gsamPointClamp, pIn.texcoord);
+    float4 transparentcolor = TransparentMap.Sample(gsamPointClamp, pIn.texcoord);
 
     uint width, height, numMips;
     SSAOMap.GetDimensions(0, width, height, numMips);
@@ -82,7 +84,7 @@ float4 PS(vs_out pIn) : SV_TARGET
 
     percentLit /= 9.0;
     //Debug
-    float4 rescolor = Lightcolor * percentLit;
+    float4 rescolor = Lightcolor * percentLit - transparentcolor*0.3;
 
 
     return rescolor;
