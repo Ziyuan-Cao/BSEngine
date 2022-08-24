@@ -192,6 +192,8 @@
     <ClInclude Include="Resource\RRender_Scene.h" />
     <ClInclude Include="Resource\RTexture.h" />
     <ClInclude Include="Window\BProcess.h" />
+    <ClInclude Include="Window\BThread.h" />
+    <ClInclude Include="Window\BThread_Heap.h" />
     <ClInclude Include="Window\BWindow.h" />
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +228,8 @@
     <ClCompile Include="Resource\RTexture.cpp" />
     <ClCompile Include="Tool\TTimer.cpp" />
     <ClCompile Include="Window\BProcess.cpp" />
+    <ClCompile Include="Window\BThread.cpp" />
+    <ClCompile Include="Window\BThread_Heap.cpp" />
     <ClCompile Include="Window\BWindow.cpp" />
   </ItemGroup>
   <ItemGroup>

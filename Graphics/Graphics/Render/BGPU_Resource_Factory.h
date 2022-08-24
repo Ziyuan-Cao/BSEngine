@@ -47,10 +47,10 @@ public:
         ID3D12GraphicsCommandList* ICmdList,
         RObject_Model* IObject_Model);
 
-    void UpdateGPUScene(RRender_Scene* IOGPUScene);
+    void UpdateGPUScene(RRender_Scene* IOGPUScene, const TTimer& ITimer);
     
     void UpdateGPULightCB(RRender_Scene* IOGPUScene);
-    void UpdateGPUSceneCB(RRender_Scene* IOGPUScene);
+    void UpdateGPUSceneCB(RRender_Scene* IOGPUScene, const TTimer& ITimer);
     void UpdateGPUMaterials(RObject_Model* IObject_Model);
     void UpdateGPUObjectCB(RObject_Model* IObject_Model);
     void UpdateGPUVertexCB( RSkeleton_Model* IObject_Model);

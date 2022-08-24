@@ -130,6 +130,12 @@
     <ClInclude Include="Render\TransparentPass.h">
       <Filter>Render</Filter>
     </ClInclude>
+    <ClInclude Include="Window\BThread.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\BThread_Heap.h">
+      <Filter>Window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Logic\dllmain.cpp">
@@ -227,6 +233,12 @@
     </ClCompile>
     <ClCompile Include="Render\TransparentPass.cpp">
       <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Window\BThread.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Window\BThread_Heap.cpp">
+      <Filter>Window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

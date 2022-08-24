@@ -16,6 +16,8 @@ public:
 	//进入程序调用
 	virtual void RenderInitialize() override;
 	virtual void RenderInitialize(HINSTANCE IHINSTANCE, UINT IWidth, UINT IHeight) override;
+	virtual void RenderInitialize(HWND IHWND, UINT IWidth, UINT IHeight) override;
+
 
 	virtual int Render(ARender_Scene* IRenderscene, bool IsDebug = true) override;
 

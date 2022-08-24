@@ -62,6 +62,20 @@ extern "C"
 			UINT	 LayerIndex = 0;
 		};
 
+		struct WaterData
+		{
+			DirectX::XMFLOAT2 windDir = { -0.5, -0.6 };
+			float windSpeed = 1.0;
+			float waveSteepness = 0.72;
+			float waveTiling = 1.0;
+			DirectX::XMFLOAT4 waveAmplitude = { 0.13, 0.3, 0.1, 0.05 };
+			float waveAmplitudeFactor = 0.25;
+			DirectX::XMFLOAT4 wavesIntensity = { 5, 3, 2, 1.3 };
+			DirectX::XMFLOAT4 wavesNoise = { 0.15, 0.32, 0.15, 0.15 };
+			float _heightIntensity = 0.3;
+			float textureTiling = 3.5;
+		};
+
 	protected:
 		MaterialData Materialdata;
 
@@ -213,6 +227,8 @@ extern "C"
 		//进入程序调用
 		virtual void RenderInitialize() = 0;
 		virtual void RenderInitialize(HINSTANCE IHINSTANCE, UINT IWidth, UINT IHeight) = 0;
+		virtual void RenderInitialize(HWND IHWND, UINT IWidth, UINT IHeight) = 0;
+
 		//每帧调用
 		virtual int Render(ARender_Scene* IRenderscene, bool IsDebug = true) = 0;
 		//释放关卡资源

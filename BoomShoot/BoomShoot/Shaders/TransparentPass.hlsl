@@ -1,6 +1,8 @@
 #include "Common.hlsl"
 #include "MathFunction.hlsl"
 
+
+
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
 
 Texture2D LightMap: register(t1);
@@ -11,13 +13,7 @@ Texture2D WaterFlowMap2 : register(t3);
 
 Texture2D GBuffer[5] : register(t4);
 
-SamplerState gsamPointWrap        : register(s0);
-SamplerState gsamPointClamp       : register(s1);
-SamplerState gsamLinearWrap       : register(s2);
-SamplerState gsamLinearClamp      : register(s3);
-SamplerState gsamAnisotropicWrap  : register(s4);
-SamplerState gsamAnisotropicClamp : register(s5);
-SamplerComparisonState gsamShadow : register(s6);
+
 
 // Constant data that varies per frame.
 cbuffer cbPerObject : register(b0)
@@ -80,193 +76,23 @@ struct VertexOutput {
 	float4 wind : TEXCOORD7; // xy = normalized wind, zw = wind multiplied with timer
 };
 
-float3 GerstnerWaveValues(float2 position, float2 D, float amplitude, float wavelength, float Q, float timer)
-{
-	float w = 2 * 3.14159265 / wavelength;
-	float dotD = dot(position, D);
-	float v = w * dotD + timer;
-	return float3(cos(v), sin(v), w);
-}
-
-half3 GerstnerWaveNormal(float2 D, float A, float Q, float3 vals)
-{
-	half C = vals.x;
-	half S = vals.y;
-	half w = vals.z;
-	half WA = w * A;
-	half WAC = WA * C;
-	half3 normal = half3(-D.x * WAC, 1.0 - Q * WA * S, -D.y * WAC);
-	return normalize(normal);
-}
-
-half3 GerstnerWaveTangent(float2 D, float A, float Q, float3 vals)
-{
-	half C = vals.x;
-	half S = vals.y;
-	half w = vals.z;
-	half WA = w * A;
-	half WAS = WA * S;
-	half3 normal = half3(Q * -D.x * D.y * WAS, D.y * WA * C, 1.0 - Q * D.y * D.y * WAS);
-	return normalize(normal);
-}
-
-float3 GerstnerWaveDelta(float2 D, float A, float Q, float3 vals)
-{
-	float C = vals.x;
-	float S = vals.y;
-	float QAC = Q * A * C;
-	return float3(QAC * D.x, A * S, QAC * D.y);
-}
-
-void GerstnerWave(float2 windDir, float tiling, float amplitude, float wavelength, float Q, float timer, inout float3 position, out half3 normal)
-{
-	float2 D = windDir;
-	float3 vals = GerstnerWaveValues(position.xz * tiling, D, amplitude, wavelength, Q, timer);
-	normal = GerstnerWaveNormal(D, amplitude, Q, vals);
-	position += GerstnerWaveDelta(D, amplitude, Q, vals);
-}
-
-float3 SineWaveValues(float2 position, float2 D, float amplitude, float wavelength, float timer)
-{
-	float w = 2 * 3.14159265 / wavelength;
-	float dotD = dot(position, D);
-	float v = w * dotD + timer;
-	return float3(cos(v), sin(v), w);
-}
-
-half3 SineWaveNormal(float2 D, float A, float3 vals)
-{
-	half C = vals.x;
-	half w = vals.z;
-	half WA = w * A;
-	half WAC = WA * C;
-	half3 normal = half3(-D.x * WAC, 1.0, -D.y * WAC);
-	return normalize(normal);
-}
-
-half3 SineWaveTangent(float2 D, float A, float3 vals)
-{
-	half C = vals.x;
-	half w = vals.z;
-	half WAC = w * A * C;
-	half3 normal = half3(0.0, D.y * WAC, 1.0);
-	return normalize(normal);
-}
-
-float SineWaveDelta(float A, float3 vals)
-{
-	return vals.y * A;
-}
-
-void SineWave(float2 windDir, float tiling, float amplitude, float wavelength, float timer, inout float3 position, out half3 normal)
-{
-	float2 D = windDir;
-	float3 vals = SineWaveValues(position.xz * tiling, D, amplitude, wavelength, timer);
-	normal = SineWaveNormal(D, amplitude, vals);
-	position.y += SineWaveDelta(amplitude, vals);
-}
-
-void AdjustWavesValues(in float2 noise, inout half4 wavesNoise, inout half4 wavesIntensity)
-{
-	wavesNoise = wavesNoise * half4(noise.y * 0.25, noise.y * 0.25, noise.x + noise.y, noise.y);
-	wavesIntensity = wavesIntensity + half4(saturate(noise.y - noise.x), noise.x, noise.y, noise.x + noise.y);
-	wavesIntensity = clamp(wavesIntensity, 0.01, 10);
-}
-
-float ComputeNoiseHeight(Texture2D heightTexture, float4 wavesIntensity, float4 wavesNoise, float2 texCoord, float2 noise, float2 timedWindDir)
-{
-	AdjustWavesValues(noise, wavesNoise, wavesIntensity);
-
-	float2 texCoords[4] = { texCoord * 1.6 + timedWindDir * 0.064 + wavesNoise.x,
-							texCoord * 0.8 + timedWindDir * 0.032 + wavesNoise.y,
-							texCoord * 0.5 + timedWindDir * 0.016 + wavesNoise.z,
-							texCoord * 0.3 + timedWindDir * 0.008 + wavesNoise.w };
-	float height = 0;
-	for (int i = 0; i < 4; ++i)
-	{
-		float4 HT = heightTexture.SampleLevel(gsamPointClamp, texCoords[i],0);
-		height += HT.x * wavesIntensity[i];
-	}
-
-	return height;
-}
-
-float3 ComputeDisplacement(float3 worldPos, float cameraDistance, float2 noise, float timer,
-	float4 waveSettings, float4 waveAmplitudes, float4 wavesIntensity, float4 waveNoise,
-	out half3 normal, out half3 tangent)
-{
-	float2 windDir = waveSettings.xy;
-	float waveSteepness = waveSettings.z;
-	float waveTiling = waveSettings.w;
-
-	//TODO: improve motion/simulation instead of just noise
-	//TODO: fix UV due to wave distortion
-
-	wavesIntensity = normalize(wavesIntensity);
-	waveNoise = half4(noise.x - noise.x * 0.2 + noise.y * 0.1, noise.x + noise.y * 0.5 - noise.y * 0.1, noise.x, noise.x) * waveNoise;
-	half4 wavelengths = half4(1, 4, 3, 6) + waveNoise;
-	half4 amplitudes = waveAmplitudes + half4(0.5, 1, 4, 1.5) * waveNoise;
-
-	// reduce wave intensity base on distance to reduce aliasing
-	wavesIntensity *= 1.0 - saturate(half4(cameraDistance / 120.0, cameraDistance / 150.0, cameraDistance / 170.0, cameraDistance / 400.0));
-
-	// compute position and normal from several sine and gerstner waves
-	tangent = normal = half3(0, 1, 0);
-	float2 timers = float2(timer * 0.5, timer * 0.25);
-	for (int i = 2; i < 4; ++i)
-	{
-		float A = wavesIntensity[i] * amplitudes[i];
-		float3 vals = SineWaveValues(worldPos.xz * waveTiling, windDir, A, wavelengths[i], timer);
-		normal += wavesIntensity[i] * SineWaveNormal(windDir, A, vals);
-		tangent += wavesIntensity[i] * SineWaveTangent(windDir, A, vals);
-		worldPos.y += SineWaveDelta(A, vals);
-	}
-
-	// using normalized wave steepness, tranform to Q
-	float2 Q = waveSteepness / ((2 * 3.14159265 / wavelengths.xy) * amplitudes.xy);
-	for (int j = 0; j < 2; ++j)
-	{
-		float A = wavesIntensity[j] * amplitudes[j];
-		float3 vals = GerstnerWaveValues(worldPos.xz * waveTiling, windDir, A, wavelengths[j], Q[j], timer);
-		normal += wavesIntensity[j] * GerstnerWaveNormal(windDir, A, Q[j], vals);
-		tangent += wavesIntensity[j] * GerstnerWaveTangent(windDir, A, Q[j], vals);
-		worldPos += GerstnerWaveDelta(windDir, A, Q[j], vals);
-	}
-
-	normal = normalize(normal);
-	tangent = normalize(tangent);
-	if (length(wavesIntensity) < 0.01)
-	{
-		normal = half3(0, 1, 0);
-		tangent = half3(0, 0, 1);
-	}
-
-	return worldPos;
-}
-
-float4 ClipToScreenPos(float4 pos)
-{
-	float4 o = pos * 0.5f;
-	o.xy += o.w;
-	o.zw = pos.zw;
-	return o;
-}
 
 VertexOutput VS(VertexIn vin)
 {
 	VertexOutput o = (VertexOutput)0;
 
 	float2 windDir = float2(-0.5,-0.6);
-	float windSpeed = 1.0;
+	float windSpeed = 5.0;
 	float waveSteepness = 0.72;
 	float waveTiling = 1.0;
 	float4 waveAmplitude = float4(0.13,0.3,0.1,0.05);
 	float waveAmplitudeFactor = 0.25;
 	float4 wavesIntensity = float4(5,3,2,1.3);
 	float4 wavesNoise = float4(0.15,0.32,0.15,0.15);
-	float4 _heightIntensity = 0.3;
-	float textureTiling = 30.5;
-	float timer = 20;
+	float _heightIntensity = 0.3;
+	float _normalIntensity = 0.52;
+	float textureTiling = 3.5;
+	float timer = gTotalTime;
 
 
 	float4 Pos = float4(vin.PosL, 1.0);
@@ -317,7 +143,35 @@ VertexOutput VS(VertexIn vin)
 
 float4 PS(VertexOutput pin) : SV_TARGET
 {
-	return float4(pin.worldPos.x,pin.worldPos.y,pin.worldPos.y,0.5);
+	MaterialData mat = gMaterialData[gMaterialIndex];
+
+	float windSpeed = 1.0;
+	float waveSteepness = 0.72;
+	float waveTiling = 1.0;
+	float4 waveAmplitude = float4(0.13, 0.3, 0.1, 0.05);
+	float waveAmplitudeFactor = 0.25;
+	float4 wavesIntensity = float4(5, 3, 2, 1.3);
+	float4 wavesNoise = float4(0.15, 0.32, 0.15, 0.15);
+	float _heightIntensity = 0.3;
+	float _normalIntensity = 0.52;
+	float textureTiling = 3.5;
+
+	float timer = pin.timer;
+	float2 windDir = pin.wind.xy;
+	float2 timedWindDir = pin.wind.zw;
+	float2 ndcPos = float2(pin.projPos.xy / pin.projPos.w);
+	float3 eyeDir = normalize(gEyePosW.xyz - pin.worldPos);
+	float3 surfacePosition = pin.worldPos;
+	half3 lightColor = mat.LightColor.rgb;
+
+	float3 normal = ComputeNormal(WaterFlowMap2, surfacePosition.xz, pin.uv,
+		pin.normal, 0, 0, wavesNoise, wavesIntensity, timedWindDir);
+
+	normal = normalize(lerp(pin.normal, normalize(normal), _normalIntensity));
+
+
+
+	return float4(normal.x, normal.y, normal.z,1.0);
 }
 
 

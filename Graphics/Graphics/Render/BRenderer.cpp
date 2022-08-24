@@ -3,6 +3,7 @@
 #define DLL_GRAPHICS_API _declspec(dllexport)
 #endif
 #include "Render/BRenderer.h"
+#include "Window/BThread_Heap.h"
 
 void DebugOnMouseDown(WPARAM btnState, int x, int y);
 void DebugOnMouseUp(WPARAM btnState, int x, int y);
@@ -62,6 +63,32 @@ void BRenderer::RenderInitialize(HINSTANCE IHINSTANCE, UINT IWidth, UINT IHeight
 
 }
 
+void BRenderer::RenderInitialize(HWND IHWND, UINT IWidth, UINT IHeight)
+{
+	HWND Hwnd = IHWND;
+	int width = IWidth;
+	int height = IHeight;
+	DXInstance = new DX_App(Hwnd);
+	DXInstance->Initialize(width, height);
+
+	ID3D12GraphicsCommandList* CmdList = DXInstance->GetCommandList();
+	ID3D12Device* Device = DXInstance->GetDevice();
+	ID3D12CommandAllocator* CmdAllocator = DXInstance->GetCommandAllocator();
+
+	//填充渲染信息
+	DXInfinstance = new DX_Information(Device, CmdList, width, height);
+	DFInstance = new BDeferredRendering(Device, CmdList);
+
+	DXInstance->ExecuteCommandList();
+	DXInstance->FlushCommandQueue();
+
+	DFInstance->Initialize(Device, CmdList);
+
+	Timer.Reset();
+
+}
+
+
 /// <summary>
 /// 将CPU数据装入GPU
 /// 再调用Render
@@ -69,6 +96,8 @@ void BRenderer::RenderInitialize(HINSTANCE IHINSTANCE, UINT IWidth, UINT IHeight
 /// <param name="IRenderscene"></param>
 int BRenderer::Render(ARender_Scene* IRenderscene, bool IsDebug)
 {
+	
+
 	DebugFlag = IsDebug;
 	MSG msg = { 0 };
 	Timer.Reset();
@@ -137,15 +166,11 @@ void BRenderer::Render(RRender_Scene* IRenderscene)
 		Camera->UpdateViewMatrix();
 	}
 	//场景相机 灯光等GPU常量刷新
-	GPUResourcefactory.UpdateGPUScene(IRenderscene);
+	GPUResourcefactory.UpdateGPUScene(IRenderscene, Timer);
 
 
 	//动画刷新
 	AniamtionUpdate(IRenderscene);
-
-
-	
-	
 
 	//
 	//3维渲染

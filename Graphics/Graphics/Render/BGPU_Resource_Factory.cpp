@@ -256,9 +256,9 @@ void BGPU_Resource_Factory::AssignTexture(ID3D12Device* IDevice,
 }
 
 
-void BGPU_Resource_Factory::UpdateGPUScene(RRender_Scene* IOGPUScene)
+void BGPU_Resource_Factory::UpdateGPUScene(RRender_Scene* IOGPUScene,const TTimer& ITimer)
 {
-    UpdateGPUSceneCB(IOGPUScene);
+    UpdateGPUSceneCB(IOGPUScene, ITimer);
     UpdateGPULightCB(IOGPUScene);
 
     for (int i = 0 ; i < IOGPUScene->Staticgroup.size();i++)
@@ -351,7 +351,7 @@ void BGPU_Resource_Factory::UpdateGPULightCB(RRender_Scene* IOGPUScene)
     }
 }
 
-void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene)
+void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene,const TTimer& ITimer)
 {
     RRender_Scene::SceneConstants Scenecontants;
 
@@ -396,8 +396,8 @@ void BGPU_Resource_Factory::UpdateGPUSceneCB(RRender_Scene* IOGPUScene)
     //Scenecontants.InvRenderTargetSize = XMFLOAT2(1.0f / d3dApp->mClientWidth, 1.0f / d3dApp->mClientHeight);
     Scenecontants.NearZ = 1.0f;
     Scenecontants.FarZ = 1000.0f;
-    //Scenecontants.TotalTime = gt.TotalTime();
-    //Scenecontants.DeltaTime = gt.DeltaTime(); 
+    Scenecontants.TotalTime = ITimer.TotalTime();
+    Scenecontants.DeltaTime = ITimer.DeltaTime();
     //should be fixed in lightPass
     Scenecontants.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
 
@@ -469,9 +469,9 @@ ID3DBlob* BGPU_Resource_Factory::CompileShader(
     const std::string& target)
 {
     UINT compileFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)  
+
     compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+
 
     HRESULT hr = S_OK;
 

@@ -141,7 +141,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 		Resourcefactory.AddMaterial(AObjectmodel, Materialgroup);
 		//ObjCB
 		AObjectmodel->Transform[0] = 0.001f;
-		AObjectmodel->Transform[1] = 0.001f;
+		AObjectmodel->Transform[1] = 0.009f;
 		AObjectmodel->Transform[2] = 0.0f;
 		AObjectmodel->Rotation[0] = 0.0001f;
 		AObjectmodel->Rotation[1] = 0.0f;
