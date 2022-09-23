@@ -57,6 +57,7 @@ void BGPU_Resource_Factory::AssignGPUObject(
     }
 
     //子物体Vertex index
+    //用同一片vertex，索引块则分开
     for (int i = 0; i < IObject_Model->Geometriesnumber; i++)
     {
         //Mesh
@@ -443,7 +444,7 @@ void BGPU_Resource_Factory::UpdateGPUObjectCB(RObject_Model* IObject_Model)
     XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
     //XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
     
-
+    //每个子物体用的同一个世界矩阵和变换矩阵，在顶点着色器再变换到世界里
     for (int i = 0; i < IObject_Model->Materialnums; i++)//each materials
     {
         objConstants.MaterialIndex = i;
